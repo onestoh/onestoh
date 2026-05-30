@@ -102,7 +102,7 @@
           <div style="margin-bottom:16px;">
             <div class="form-label" style="margin-bottom:8px;">Your Bid Amount</div>
             <div style="display:flex; gap:8px; margin-bottom:8px;">
-              @foreach(['$515,000','$520,000','$525,000']) 
+              @foreach(['$515,000','$520,000','$525,000'] as $val)
               <button onclick="document.getElementById('bidAmount').value='{{ str_replace(',','',str_replace('$','', $val)) }}'" class="btn btn-sm btn-outline" style="flex:1; justify-content:center; font-size:12px;">{{ $val }}</button>
               @endforeach
             </div>

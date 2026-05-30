@@ -53,7 +53,7 @@
           </div>
 
           <div style="display:flex; gap:20px; flex-wrap:wrap; padding:16px; background:var(--surface); border-radius:10px; margin-bottom:20px;">
-            @foreach([['🛏','4 Bedrooms'],['🚿','3 Bathrooms'],['📐','340m²'],['🚗','2 Car Garage'],['🌊','Swimming Pool'],['🌳','Large Garden']])
+            @foreach([['🛏','4 Bedrooms'],['🚿','3 Bathrooms'],['📐','340m²'],['🚗','2 Car Garage'],['🌊','Swimming Pool'],['🌳','Large Garden']] as $spec)
             <div style="text-align:center;">
               <div style="font-size:20px;">{{ $spec[0] }}</div>
               <div style="font-size:12px; color:var(--muted); margin-top:4px; font-family:var(--font-mono);">{{ $spec[1] }}</div>
@@ -79,7 +79,7 @@
           <div style="margin-top:20px;">
             <div class="section-tag" style="margin-bottom:12px;">Amenities</div>
             <div style="display:flex; gap:8px; flex-wrap:wrap;">
-              @foreach(['🌊 Heated Pool','🌳 Garden','🚗 2-Car Garage','🔒 24hr Security','💡 Backup Generator','🌐 Fibre Internet','🛁 Jacuzzi','🏋️ Gym Room','🌴 Outdoor BBQ','🐕 Pet Friendly'])
+              @foreach(['🌊 Heated Pool','🌳 Garden','🚗 2-Car Garage','🔒 24hr Security','💡 Backup Generator','🌐 Fibre Internet','🛁 Jacuzzi','🏋️ Gym Room','🌴 Outdoor BBQ','🐕 Pet Friendly'] as $am)
               <span class="chip">{{ $am }}</span>
               @endforeach
             </div>
@@ -99,7 +99,7 @@
         <div style="background:var(--navy3); border:1px solid var(--border-dim); border-radius:var(--radius); padding:24px;">
           <h3 style="font-size:15px; font-weight:600; color:var(--white); margin-bottom:16px;">📍 Nearby</h3>
           <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
-            @foreach([['🏫','Karen C Primary','0.8km'],['🏥','Karen Hospital','1.2km'],['🛒','Karen Hub Mall','0.5km'],['🚌','Karen Bus Terminal','0.9km'],['⛽','Total Petrol Station','0.3km'],['🌿','Karen Park','0.2km']])
+            @foreach([['🏫','Karen C Primary','0.8km'],['🏥','Karen Hospital','1.2km'],['🛒','Karen Hub Mall','0.5km'],['🚌','Karen Bus Terminal','0.9km'],['⛽','Total Petrol Station','0.3km'],['🌿','Karen Park','0.2km']] as $n)
             <div style="display:flex; align-items:center; gap:10px; font-size:13px; color:var(--muted);">
               <span>{{ $n[0] }}</span><span>{{ $n[1] }}</span><span style="color:var(--gold); font-family:var(--font-mono); font-size:11px; margin-left:auto;">{{ $n[2] }}</span>
             </div>

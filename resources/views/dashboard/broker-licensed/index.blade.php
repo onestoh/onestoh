@@ -120,7 +120,7 @@
   <div style="background:var(--navy3); border:1px solid var(--border-dim); border-radius:var(--radius); padding:24px;">
     <div class="table-card-title" style="margin-bottom:16px;">📲 Social Media Auto-Post</div>
     <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px;">
-      @foreach([['📘','Facebook','Connected'],['📷','Instagram','Connected'],['🎵','TikTok','Connect'],['🐦','X (Twitter)','Connected'],['💼','LinkedIn','Connect']])
+      @foreach([['📘','Facebook','Connected'],['📷','Instagram','Connected'],['🎵','TikTok','Connect'],['🐦','X (Twitter)','Connected'],['💼','LinkedIn','Connect']] as $sm)
       <div style="background:var(--surface); border:1px solid {{ $sm[2]==='Connected' ? 'rgba(46,204,138,0.3)' : 'var(--border-dim)' }}; border-radius:var(--radius-sm); padding:10px 14px; display:flex; align-items:center; gap:8px;">
         <span>{{ $sm[0] }}</span>
         <div>

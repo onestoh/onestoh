@@ -31,31 +31,57 @@
 
 @section('content')
 
+@if(session('success'))
+<div class="alert alert-green" style="margin-bottom:24px;">{{ session('success') }}</div>
+@endif
+
 <!-- KPIs -->
+@php
+  $liveAuctions     = $auctions->where('status','live');
+  $upcomingAuctions = $auctions->where('status','upcoming');
+  $totalBids        = $auctions->sum(fn($a) => $a->bids->count());
+@endphp
 <div class="kpi-grid">
-  @foreach([
-    ['🔴','3','Live Auctions','2h 14m avg. remaining','up'],
-    ['⏰','8','Upcoming','Next: 2 days','up'],
-    ['👥','1,247','Total Bidders','All active auctions','up'],
-    ['💰','KSh 284K','Revenue This Month','Auction fees earned','up'],
-    ['✅','24','Completed Auctions','This year','up'],
-    ['🔒','$4.2M','Escrow Triggered','Awaiting release','up'],
-  ] as $k)
   <div class="kpi-card">
-    <div class="kpi-icon">{{ $k[0] }}</div>
-    <div class="kpi-value">{{ $k[1] }}</div>
-    <div class="kpi-label">{{ $k[2] }}</div>
-    <div class="kpi-change {{ $k[4] }}">{{ $k[3] }}</div>
+    <div class="kpi-icon">🔴</div>
+    <div class="kpi-value">{{ $liveCount }}</div>
+    <div class="kpi-label">Live Auctions</div>
+    <div class="kpi-change up">Currently active</div>
   </div>
-  @endforeach
+  <div class="kpi-card">
+    <div class="kpi-icon">⏰</div>
+    <div class="kpi-value">{{ $upcomingCount }}</div>
+    <div class="kpi-label">Upcoming Auctions</div>
+    <div class="kpi-change up">Scheduled</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-icon">✅</div>
+    <div class="kpi-value">{{ $endedCount }}</div>
+    <div class="kpi-label">Completed</div>
+    <div class="kpi-change up">All time</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-icon">👥</div>
+    <div class="kpi-value">{{ $totalBids }}</div>
+    <div class="kpi-label">Total Bids</div>
+    <div class="kpi-change up">Across all auctions</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-icon">🏠</div>
+    <div class="kpi-value">{{ $auctions->count() }}</div>
+    <div class="kpi-label">Total Auctions</div>
+    <div class="kpi-change up">All time</div>
+  </div>
 </div>
 
 <!-- LIVE AUCTION MANAGER -->
+@php $firstLive = $liveAuctions->first(); @endphp
+@if($firstLive)
 <div class="auction-live" style="margin-bottom:28px;">
   <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
     <div>
       <div class="section-tag" style="color:var(--red);">🔴 LIVE AUCTION IN PROGRESS</div>
-      <h2 style="font-size:22px; font-weight:700; color:var(--white); margin-top:4px;">Commercial Block, Nairobi CBD</h2>
+      <h2 style="font-size:22px; font-weight:700; color:var(--white); margin-top:4px;">{{ $firstLive->property->title ?? 'Live Auction' }}</h2>
     </div>
     <div style="display:flex; gap:8px;">
       <button onclick="showToast('Auction extended by 5 minutes (anti-sniping)', 'gold')" class="btn btn-sm btn-outline">⏱ Extend +5min</button>
@@ -75,36 +101,35 @@
     </div>
     <div style="text-align:center; background:rgba(0,0,0,0.2); border-radius:10px; padding:16px;">
       <div style="font-size:11px; font-family:var(--font-mono); color:var(--gold); letter-spacing:1px; margin-bottom:6px;">CURRENT BID</div>
-      <div style="font-family:var(--font-serif); font-size:32px; font-weight:700; color:var(--gold);">$512,000</div>
+      <div style="font-family:var(--font-serif); font-size:32px; font-weight:700; color:var(--gold);">KSh {{ number_format($firstLive->current_bid ?? $firstLive->starting_bid ?? 0) }}</div>
     </div>
     <div style="text-align:center; background:rgba(0,0,0,0.2); border-radius:10px; padding:16px;">
-      <div style="font-size:11px; font-family:var(--font-mono); color:var(--blue); letter-spacing:1px; margin-bottom:6px;">BIDDERS</div>
-      <div style="font-family:var(--font-serif); font-size:32px; font-weight:700; color:var(--white);">24 / 31</div>
+      <div style="font-size:11px; font-family:var(--font-mono); color:var(--blue); letter-spacing:1px; margin-bottom:6px;">BIDS PLACED</div>
+      <div style="font-family:var(--font-serif); font-size:32px; font-weight:700; color:var(--white);">{{ $firstLive->bids->count() }}</div>
     </div>
     <div style="text-align:center; background:rgba(0,0,0,0.2); border-radius:10px; padding:16px;">
       <div style="font-size:11px; font-family:var(--font-mono); color:var(--green); letter-spacing:1px; margin-bottom:6px;">RESERVE</div>
-      <div style="font-family:var(--font-serif); font-size:24px; font-weight:700; color:var(--green);">✓ MET</div>
+      <div style="font-family:var(--font-serif); font-size:24px; font-weight:700; color:var(--green);">
+        {{ ($firstLive->current_bid ?? 0) >= ($firstLive->reserve_price ?? PHP_INT_MAX) ? '✓ MET' : '✗ NOT MET' }}
+      </div>
     </div>
   </div>
 
   <!-- Live Bid Feed -->
   <div style="background:rgba(0,0,0,0.3); border-radius:10px; padding:16px; max-height:200px; overflow-y:auto;">
     <div style="font-size:11px; font-family:var(--font-mono); color:var(--red); letter-spacing:2px; margin-bottom:12px;">📡 LIVE BID FEED</div>
-    @foreach([
-      ['Bidder #24','$512,000','Just now','#2ECC8A'],
-      ['Bidder #11','$508,000','1 min ago','#7A90B0'],
-      ['Bidder #24','$502,000','2 min ago','#7A90B0'],
-      ['Bidder #07','$495,000','4 min ago','#7A90B0'],
-      ['Bidder #31','$490,000','6 min ago','#7A90B0'],
-    ] as $bid)
+    @forelse($firstLive->bids->sortByDesc('created_at')->take(10) as $bid)
     <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.05); font-size:13px;">
-      <span style="color:{{ $bid[3] }}; font-weight:600;">{{ $bid[0] }}</span>
-      <span style="color:var(--white); font-family:var(--font-serif); font-weight:700;">{{ $bid[1] }}</span>
-      <span style="color:var(--muted); font-family:var(--font-mono); font-size:11px;">{{ $bid[2] }}</span>
+      <span style="color:{{ $bid->is_winning ? '#2ECC8A' : '#7A90B0' }}; font-weight:600;">Bidder #{{ $bid->bidder_id }}</span>
+      <span style="color:var(--white); font-family:var(--font-serif); font-weight:700;">KSh {{ number_format($bid->amount) }}</span>
+      <span style="color:var(--muted); font-family:var(--font-mono); font-size:11px;">{{ $bid->created_at->diffForHumans() }}</span>
     </div>
-    @endforeach
+    @empty
+    <div style="color:var(--muted); font-size:13px;">No bids yet.</div>
+    @endforelse
   </div>
 </div>
+@endif
 
 <!-- BIDDER KYC + UPCOMING -->
 <div class="grid-2">
@@ -137,25 +162,24 @@
   <!-- Upcoming Auctions -->
   <div class="table-card">
     <div class="table-card-header">
-      <div class="table-card-title">⏰ Upcoming Auctions</div>
+      <div class="table-card-title">⏰ All Auctions</div>
       <a href="#" class="btn btn-gold btn-sm">+ Create Auction</a>
     </div>
     <table class="data-table">
-      <thead><tr><th>Property</th><th>Start</th><th>Reserve</th><th>Status</th></tr></thead>
+      <thead><tr><th>Property</th><th>Starts</th><th>Reserve</th><th>Current Bid</th><th>Bids</th><th>Status</th></tr></thead>
       <tbody>
-        @foreach([
-          ['4-Bed Villa, Karen','Jun 5, 10am','$250K','scheduled'],
-          ['Office Suite, CBD','Jun 8, 2pm','$420K','scheduled'],
-          ['Farmland, Nakuru','Jun 10, 9am','$80K','scheduled'],
-          ['Off-Plan x5, Kilimani','Jun 15, 11am','$700K','draft'],
-        ] as $ua)
+        @forelse($auctions as $a)
         <tr>
-          <td class="td-name">{{ $ua[0] }}</td>
-          <td style="font-family:var(--font-mono); font-size:12px;">{{ $ua[1] }}</td>
-          <td class="td-price">{{ $ua[2] }}</td>
-          <td><span class="status-pill status-{{ $ua[3] === 'draft' ? 'draft' : 'active' }}">{{ strtoupper($ua[3]) }}</span></td>
+          <td class="td-name">{{ $a->property->title ?? 'N/A' }}</td>
+          <td style="font-family:var(--font-mono); font-size:12px;">{{ $a->start_time ? \Carbon\Carbon::parse($a->start_time)->format('d M, H:i') : '—' }}</td>
+          <td class="td-price">KSh {{ number_format($a->reserve_price ?? 0) }}</td>
+          <td class="td-price">{{ $a->current_bid ? 'KSh '.number_format($a->current_bid) : '—' }}</td>
+          <td>{{ $a->bids->count() }}</td>
+          <td><span class="status-pill status-{{ $a->status === 'live' ? 'active' : ($a->status === 'ended' ? 'sold' : 'draft') }}">{{ strtoupper($a->status) }}</span></td>
         </tr>
-        @endforeach
+        @empty
+        <tr><td colspan="6" style="text-align:center; color:var(--muted); padding:24px;">No auctions yet.</td></tr>
+        @endforelse
       </tbody>
     </table>
   </div>

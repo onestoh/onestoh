@@ -81,7 +81,7 @@
       @endforeach
     </div>
     <div style="display:flex; justify-content:space-between; margin-top:8px;">
-      @foreach(['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'])
+      @foreach(['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'] as $m)
       <div style="font-size:9px; font-family:var(--font-mono); color:var(--muted); text-align:center; flex:1;">{{ $m }}</div>
       @endforeach
     </div>

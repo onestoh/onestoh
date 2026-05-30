@@ -35,7 +35,7 @@
 
             <div class="form-group">
               <div class="form-label">Property Type</div>
-              @foreach(['House','Apartment','Land/Plot','Off-Plan','Hotel/Airbnb','Commercial','Industrial']) 
+              @foreach(['House','Apartment','Land/Plot','Off-Plan','Hotel/Airbnb','Commercial','Industrial'] as $type)
               <label style="display:flex; align-items:center; gap:8px; padding:6px 0; cursor:pointer; font-size:13px; color:var(--muted);">
                 <input type="checkbox" style="accent-color:var(--gold);"> {{ $type }}
               </label>
@@ -55,7 +55,7 @@
             <div class="form-group" style="margin-top:20px;">
               <div class="form-label">Bedrooms</div>
               <div style="display:flex; gap:6px; flex-wrap:wrap;">
-                @foreach(['Any','1','2','3','4','5+']) 
+                @foreach(['Any','1','2','3','4','5+'] as $beds)
                 <button onclick="toggleFilter(this)" style="padding:6px 14px; border-radius:6px; font-size:12px; background:var(--navy3); border:1px solid var(--border-dim); color:var(--muted); cursor:pointer;">{{ $beds }}</button>
                 @endforeach
               </div>
@@ -64,7 +64,7 @@
             <div class="form-group" style="margin-top:20px;">
               <div class="form-label">Bathrooms</div>
               <div style="display:flex; gap:6px; flex-wrap:wrap;">
-                @foreach(['Any','1','2','3','4+']) 
+                @foreach(['Any','1','2','3','4+'] as $baths)
                 <button onclick="toggleFilter(this)" style="padding:6px 14px; border-radius:6px; font-size:12px; background:var(--navy3); border:1px solid var(--border-dim); color:var(--muted); cursor:pointer;">{{ $baths }}</button>
                 @endforeach
               </div>
@@ -72,7 +72,7 @@
 
             <div class="form-group" style="margin-top:20px;">
               <div class="form-label">Amenities</div>
-              @foreach(['Swimming Pool','Gym','Parking','Security','Generator','CCTV','Garden']) 
+              @foreach(['Swimming Pool','Gym','Parking','Security','Generator','CCTV','Garden'] as $am)
               <label style="display:flex; align-items:center; gap:8px; padding:5px 0; cursor:pointer; font-size:13px; color:var(--muted);">
                 <input type="checkbox" style="accent-color:var(--gold);"> {{ $am }}
               </label>
@@ -81,7 +81,7 @@
 
             <div class="form-group" style="margin-top:20px;">
               <div class="form-label">Listing Status</div>
-              @foreach(['Verified Only','Featured','New (Last 7 days)','Price Reduced','With Virtual Tour']) 
+              @foreach(['Verified Only','Featured','New (Last 7 days)','Price Reduced','With Virtual Tour'] as $st)
               <label style="display:flex; align-items:center; gap:8px; padding:5px 0; cursor:pointer; font-size:13px; color:var(--muted);">
                 <input type="checkbox" style="accent-color:var(--gold);"> {{ $st }}
               </label>

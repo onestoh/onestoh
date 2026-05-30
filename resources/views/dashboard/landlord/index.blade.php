@@ -33,32 +33,67 @@
 
 @section('content')
 
-<div class="alert alert-green" style="margin-bottom:24px;">💳 Rent collected: KSh 245,000 received today from 3 tenants. Funds transferred to your M-Pesa.</div>
+@php
+  $paidCount    = $rentPaymentsByStatus->get('paid')->count    ?? 0;
+  $pendingCount = $rentPaymentsByStatus->get('pending')->count  ?? 0;
+  $overdueCount = $rentPaymentsByStatus->get('overdue')->count  ?? 0;
+  $paidTotal    = $rentPaymentsByStatus->get('paid')->total     ?? 0;
+  $pendingTotal = $rentPaymentsByStatus->get('pending')->total  ?? 0;
+  $overdueTotal = $rentPaymentsByStatus->get('overdue')->total  ?? 0;
+@endphp
+
+@if(session('success'))
+<div class="alert alert-green" style="margin-bottom:24px;">{{ session('success') }}</div>
+@endif
+
+@if($paidCount > 0)
+<div class="alert alert-green" style="margin-bottom:24px;">💳 Rent collected: KSh {{ number_format($paidTotal) }} from {{ $paidCount }} payment(s) this period.</div>
+@endif
 
 <!-- KPIs -->
 <div class="kpi-grid">
-  @foreach([
-    ['🏘️','12','Total Properties','8 residential · 4 commercial','up'],
-    ['✅','89%','Occupancy Rate','↑ 4% vs last quarter','up'],
-    ['💰','KSh 485K','Monthly Rent Income','Expected this month','up'],
-    ['⚠️','KSh 95K','Outstanding Arrears','2 tenants overdue','down'],
-    ['🔧','4','Maintenance Open','1 urgent · 3 normal','down'],
-    ['📋','3','Lease Renewals Due','Within next 30 days','down'],
-  ] as $k)
   <div class="kpi-card">
-    <div class="kpi-icon">{{ $k[0] }}</div>
-    <div class="kpi-value">{{ $k[1] }}</div>
-    <div class="kpi-label">{{ $k[2] }}</div>
-    <div class="kpi-change {{ $k[4] }}">{{ $k[3] }}</div>
+    <div class="kpi-icon">🏘️</div>
+    <div class="kpi-value">{{ $properties->count() }}</div>
+    <div class="kpi-label">Total Properties</div>
+    <div class="kpi-change up">{{ $properties->where('status','active')->count() }} active</div>
   </div>
-  @endforeach
+  <div class="kpi-card">
+    <div class="kpi-icon">📋</div>
+    <div class="kpi-value">{{ $leases->count() }}</div>
+    <div class="kpi-label">Total Leases</div>
+    <div class="kpi-change up">{{ $leases->where('status','active')->count() }} active</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-icon">💰</div>
+    <div class="kpi-value">KSh {{ number_format($paidTotal) }}</div>
+    <div class="kpi-label">Rent Collected</div>
+    <div class="kpi-change up">{{ $paidCount }} payment(s)</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-icon">⏳</div>
+    <div class="kpi-value">KSh {{ number_format($pendingTotal) }}</div>
+    <div class="kpi-label">Pending Rent</div>
+    <div class="kpi-change down">{{ $pendingCount }} payment(s)</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-icon">⚠️</div>
+    <div class="kpi-value">KSh {{ number_format($overdueTotal) }}</div>
+    <div class="kpi-label">Overdue Arrears</div>
+    <div class="kpi-change down">{{ $overdueCount }} overdue</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-icon">🔧</div>
+    <div class="kpi-value">{{ $maintenanceRequests->where('status','open')->count() }}</div>
+    <div class="kpi-label">Maintenance Open</div>
+    <div class="kpi-change down">{{ $maintenanceRequests->where('priority','urgent')->count() }} urgent</div>
+  </div>
 </div>
 
 <!-- QUICK ACTIONS -->
 <div style="display:flex; gap:10px; margin-bottom:28px; flex-wrap:wrap;">
-  <a href="{{ url('/marketplace') }}" class="btn btn-gold"><span>➕</span> Add Property</a>
+  <a href="{{ url('/properties/create') }}" class="btn btn-gold"><span>➕</span> List New Property</a>
   <button onclick="showToast('Invite link copied!', 'green')" class="btn btn-outline"><span>📨</span> Invite Tenant</button>
-  <button class="btn btn-outline"><span>💳</span> Collect Rent</button>
   <a href="{{ url('/financing') }}" class="btn btn-outline"><span>🏦</span> Apply Finance</a>
   <button class="btn btn-outline"><span>📊</span> Download Report</button>
 </div>
@@ -67,34 +102,47 @@
 <div class="table-card" style="margin-bottom:28px;">
   <div class="table-card-header">
     <div class="table-card-title">🏘️ Property Portfolio</div>
-    <a href="#" class="btn btn-gold btn-sm">+ Add Property</a>
+    <a href="{{ url('/properties/create') }}" class="btn btn-gold btn-sm">+ List New Property</a>
   </div>
+  @if($properties->isEmpty())
+  <div style="padding:40px; text-align:center; color:var(--muted);">
+    <div style="font-size:48px; margin-bottom:12px;">🏡</div>
+    <div style="font-size:15px; margin-bottom:16px;">No properties listed yet.</div>
+    <a href="{{ url('/properties/create') }}" class="btn btn-gold">List Your First Property</a>
+  </div>
+  @else
   <table class="data-table">
-    <thead><tr><th>Property</th><th>Type</th><th>Units</th><th>Occupancy</th><th>Monthly Income</th><th>Status</th><th></th></tr></thead>
+    <thead><tr><th>Property</th><th>Type</th><th>Leases</th><th>Price</th><th>Status</th><th>Actions</th></tr></thead>
     <tbody>
-      @foreach([
-        ['🏠','4-Bed Villa, Karen','Residential','1/1','100%','KSh 120K','active'],
-        ['🏢','Westlands Apartments','Residential','8/10','80%','KSh 280K','active'],
-        ['🏬','CBD Office Block','Commercial','3/4','75%','KSh 180K','active'],
-        ['🏡','3-Bed Bungalow, Lavington','Residential','1/1','100%','KSh 85K','active'],
-        ['🏭','Warehouse, Syokimau','Industrial','1/1','100%','KSh 55K','active'],
-        ['🏘️','Kilimani Flats (x6)','Residential','5/6','83%','KSh 150K','active'],
-      ] as $p)
+      @foreach($properties as $p)
       <tr>
-        <td><div class="td-name" style="display:flex; align-items:center; gap:8px;"><span>{{ $p[0] }}</span>{{ $p[1] }}</div></td>
-        <td>{{ $p[2] }}</td>
-        <td>{{ $p[3] }}</td>
         <td>
-          <div style="font-size:13px; color:{{ $p[4]==='100%' ? 'var(--green)' : 'var(--gold)' }}; margin-bottom:4px;">{{ $p[4] }}</div>
-          <div class="progress" style="width:80px;"><div class="progress-bar {{ $p[4]==='100%' ? 'green' : '' }}" style="width:{{ $p[4] }};"></div></div>
+          <div class="td-name" style="display:flex; align-items:center; gap:8px;">
+            <span>🏠</span>
+            <div>
+              <div style="font-weight:600; color:var(--white);">{{ $p->title }}</div>
+              <div style="font-size:12px; color:var(--muted);">{{ $p->county }} · {{ $p->location }}</div>
+            </div>
+          </div>
         </td>
-        <td class="td-price">{{ $p[5] }}</td>
-        <td><span class="status-pill status-active">ACTIVE</span></td>
-        <td><div style="display:flex; gap:6px;"><button class="btn btn-sm btn-outline">Manage</button><button class="btn btn-sm btn-outline">📋 Leases</button></div></td>
+        <td>{{ ucfirst($p->type) }}</td>
+        <td>{{ $p->leases_count }}</td>
+        <td class="td-price">KSh {{ number_format($p->price) }}</td>
+        <td><span class="status-pill status-{{ $p->status }}">{{ strtoupper($p->status) }}</span></td>
+        <td>
+          <div style="display:flex; gap:6px;">
+            <a href="{{ url('/properties/' . $p->id . '/edit') }}" class="btn btn-sm btn-outline">✏️ Edit</a>
+            <form method="POST" action="{{ url('/properties/' . $p->id) }}" onsubmit="return confirm('Delete this property?')">
+              @csrf @method('DELETE')
+              <button type="submit" class="btn btn-sm btn-danger">🗑</button>
+            </form>
+          </div>
+        </td>
       </tr>
       @endforeach
     </tbody>
   </table>
+  @endif
 </div>
 
 <!-- RENT COLLECTION & CHART -->
@@ -107,29 +155,29 @@
       <button onclick="showToast('Reminders sent to overdue tenants', 'gold')" class="btn btn-sm btn-outline">Send Reminders</button>
     </div>
     <table class="data-table">
-      <thead><tr><th>Tenant</th><th>Property</th><th>Rent</th><th>Due Date</th><th>Status</th></tr></thead>
+      <thead><tr><th>Tenant</th><th>Property</th><th>Amount</th><th>Due Date</th><th>Status</th></tr></thead>
       <tbody>
-        @foreach([
-          ['James M.','Karen Villa','KSh 120K','1st Jun','paid'],
-          ['Sarah O.','Westlands Apt 2A','KSh 35K','1st Jun','paid'],
-          ['David W.','Westlands Apt 2B','KSh 35K','1st Jun','paid'],
-          ['Alice N.','Kilimani Flat 3','KSh 25K','5th Jun','pending'],
-          ['Peter K.','CBD Office 2F','KSh 45K','1st Jun','overdue'],
-          ['Tom A.','Westlands Apt 4C','KSh 35K','1st Jun','overdue'],
-          ['Grace L.','Lavington','KSh 85K','3rd Jun','pending'],
-        ] as $t)
+        @forelse($leases as $lease)
         <tr>
-          <td class="td-name">{{ $t[0] }}</td>
-          <td>{{ $t[1] }}</td>
-          <td class="td-price">{{ $t[2] }}</td>
-          <td style="font-family:var(--font-mono); font-size:12px;">{{ $t[3] }}</td>
-          <td><span class="status-pill status-{{ $t[4] }}">{{ strtoupper($t[4]) }}</span></td>
+          <td class="td-name">{{ $lease->tenant->name ?? 'N/A' }}</td>
+          <td>{{ $lease->property->title ?? 'N/A' }}</td>
+          <td class="td-price">KSh {{ number_format($lease->monthly_rent ?? 0) }}</td>
+          <td style="font-family:var(--font-mono); font-size:12px;">
+            {{ $lease->end_date ? $lease->end_date->format('d M Y') : '—' }}
+          </td>
+          <td><span class="status-pill status-{{ $lease->status }}">{{ strtoupper($lease->status) }}</span></td>
         </tr>
-        @endforeach
+        @empty
+        <tr><td colspan="5" style="text-align:center; color:var(--muted); padding:24px;">No leases found.</td></tr>
+        @endforelse
       </tbody>
     </table>
     <div style="padding:16px 24px; border-top:1px solid var(--border-dim); display:flex; justify-content:space-between;">
-      <div style="font-size:13px; color:var(--muted);">Collected: <span style="color:var(--green); font-weight:600;">KSh 245K</span> · Pending: <span style="color:var(--gold); font-weight:600;">KSh 110K</span> · Overdue: <span style="color:var(--red); font-weight:600;">KSh 80K</span></div>
+      <div style="font-size:13px; color:var(--muted);">
+        Collected: <span style="color:var(--green); font-weight:600;">KSh {{ number_format($paidTotal) }}</span> ·
+        Pending: <span style="color:var(--gold); font-weight:600;">KSh {{ number_format($pendingTotal) }}</span> ·
+        Overdue: <span style="color:var(--red); font-weight:600;">KSh {{ number_format($overdueTotal) }}</span>
+      </div>
     </div>
   </div>
 
@@ -158,24 +206,21 @@
   <div class="table-card">
     <div class="table-card-header">
       <div class="table-card-title">🔧 Maintenance Requests</div>
-      <span class="badge badge-orange">4 Open</span>
+      <span class="badge badge-orange">{{ $maintenanceRequests->where('status','open')->count() }} Open</span>
     </div>
     <div style="padding:0 24px;">
-      @foreach([
-        ['Peter K.','CBD Office — Blocked sink','High','2 days ago'],
-        ['Sarah O.','Westlands Apt — AC unit faulty','Medium','3 days ago'],
-        ['David W.','Westlands Apt — Door lock broken','Medium','5 days ago'],
-        ['Alice N.','Kilimani Flat — Leaking tap','Low','1 week ago'],
-      ] as $m)
+      @forelse($maintenanceRequests as $m)
       <div style="display:flex; gap:12px; padding:14px 0; border-bottom:1px solid var(--border-dim); align-items:flex-start;">
         <span style="font-size:24px;">🔧</span>
         <div style="flex:1;">
-          <div style="font-size:13px; font-weight:600; color:var(--white);">{{ $m[1] }}</div>
-          <div style="font-size:12px; color:var(--muted); margin-top:2px;">From: {{ $m[0] }} · {{ $m[3] }}</div>
+          <div style="font-size:13px; font-weight:600; color:var(--white);">{{ $m->property->title ?? 'N/A' }} — {{ $m->title }}</div>
+          <div style="font-size:12px; color:var(--muted); margin-top:2px;">{{ $m->created_at->diffForHumans() }}</div>
         </div>
-        <span class="status-pill {{ $m[2]==='High' ? 'status-overdue' : ($m[2]==='Medium' ? 'status-review' : 'status-draft') }}">{{ $m[2] }}</span>
+        <span class="status-pill {{ $m->priority==='urgent'||$m->priority==='high' ? 'status-overdue' : ($m->priority==='medium' ? 'status-review' : 'status-draft') }}">{{ strtoupper($m->priority) }}</span>
       </div>
-      @endforeach
+      @empty
+      <div style="padding:24px 0; text-align:center; color:var(--muted);">No maintenance requests.</div>
+      @endforelse
     </div>
   </div>
 
