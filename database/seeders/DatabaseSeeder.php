@@ -644,6 +644,52 @@ class DatabaseSeeder extends Seeder
         }
     }
 
+    private function seedHotelRoomsAndBookings(): void
+    {
+        $hotelProperties = Property::where(function($q) {
+            $q->where('type', 'hotel')->orWhereIn('listing_type', ['airbnb', 'hotel']);
+        })->take(5)->get();
+
+        foreach ($hotelProperties as $prop) {
+            foreach ([['Standard', 'standard', 8000, 1], ['Deluxe', 'deluxe', 15000, 2], ['Suite', 'suite', 25000, 3]] as $i => $r) {
+                HotelRoom::firstOrCreate(
+                    ['property_id' => $prop->id, 'room_number' => '10' . ($i + 1)],
+                    [
+                        'room_type'      => $r[1],
+                        'name'           => $r[0] . ' Room',
+                        'capacity'       => $r[2],
+                        'price_per_night'=> $r[2],
+                        'amenities'      => ['WiFi', 'AC', 'TV'],
+                        'is_active'      => true,
+                    ]
+                );
+            }
+        }
+
+        $guests = User::where('role', 'tenant')->take(5)->get();
+        $hostProps = Property::whereIn('listing_type', ['airbnb', 'hotel'])->take(5)->get();
+
+        foreach ($hostProps as $i => $prop) {
+            if ($guests->isEmpty()) break;
+            $guest = $guests[$i % $guests->count()];
+            $checkIn  = now()->addDays(rand(5, 30))->toDateString();
+            $checkOut = \Carbon\Carbon::parse($checkIn)->addDays(rand(2, 7))->toDateString();
+            try {
+                $booking = \App\Services\BookingService::create([
+                    'property_id'  => $prop->id,
+                    'guest_id'     => $guest->id,
+                    'type'         => $prop->listing_type ?? 'airbnb',
+                    'check_in'     => $checkIn,
+                    'check_out'    => $checkOut,
+                    'guests_count' => rand(1, 3),
+                ]);
+                \App\Services\BookingService::confirm($booking, 'mpesa', 'MPESA' . rand(100000, 999999));
+            } catch (\Throwable $e) {
+                // skip if dates clash
+            }
+        }
+    }
+
     private function printCounts(): void
     {
         $this->command->info('');
