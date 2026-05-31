@@ -4,6 +4,8 @@ namespace Database\Seeders;
 
 use App\Models\Auction;
 use App\Models\Bid;
+use App\Models\Booking;
+use App\Models\HotelRoom;
 use App\Models\DeveloperProject;
 use App\Models\EscrowTransaction;
 use App\Models\Inspection;
@@ -42,6 +44,7 @@ class DatabaseSeeder extends Seeder
         $this->seedDeveloperProjects();
         $this->seedMessages();
         $this->seedNotifications();
+        $this->seedHotelRoomsAndBookings();
 
         $this->printCounts();
     }
