@@ -86,6 +86,20 @@
           </div>
         </div>
 
+        @if(in_array($property->listing_type ?? 'sale', ['airbnb', 'hotel']))
+        <!-- Availability Calendar -->
+        <div class="section-card" style="background:var(--navy3); border:1px solid var(--border-dim); border-radius:var(--radius); padding:24px; margin-bottom:24px;">
+          <h3 style="color:var(--white); font-family:var(--font-serif); font-size:20px; margin-bottom:8px;">📅 Availability</h3>
+          <p style="color:var(--muted); font-size:14px; margin-bottom:16px;">Minimum stay: 1 night · Check-in after 2 PM · Check-out before 11 AM</p>
+          <div id="availabilityCalendar" style="display:grid; grid-template-columns:1fr 1fr; gap:24px;"></div>
+          <div style="display:flex; gap:16px; margin-top:12px; font-size:12px;">
+            <span style="display:flex; align-items:center; gap:6px;"><span style="width:10px; height:10px; background:var(--red); border-radius:3px; display:inline-block;"></span> Booked</span>
+            <span style="display:flex; align-items:center; gap:6px;"><span style="width:10px; height:10px; background:var(--gold); border-radius:3px; display:inline-block;"></span> Selected</span>
+            <span style="display:flex; align-items:center; gap:6px;"><span style="width:10px; height:10px; background:var(--gold-dim); border:1px solid var(--gold); border-radius:3px; display:inline-block;"></span> Range</span>
+          </div>
+        </div>
+        @endif
+
         <!-- Map Placeholder -->
         <div class="map-container" style="margin-bottom:24px;">
           <div class="map-placeholder">
@@ -125,37 +139,103 @@
           <div style="font-size:12px; color:var(--muted);">Share this link and earn KSh 50,000 when a deal closes via your referral</div>
         </div>
 
-        <!-- Contact / Book -->
+        <!-- Contact / Book — smart widget depending on listing type -->
+        @php $lt = $property->listing_type ?? 'sale'; @endphp
+        @if(in_array($lt, ['airbnb', 'hotel']))
+        <!-- BOOKING WIDGET for short stays -->
+        <div class="form-card" style="position:sticky; top:100px; background:var(--navy2); border:1px solid var(--border); border-radius:var(--radius); padding:24px; margin-bottom:16px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+            <div>
+              <span style="font-size:24px; font-weight:700; color:var(--gold); font-family:var(--font-serif);">KES {{ number_format($property->price) }}</span>
+              <span style="color:var(--muted); font-size:13px;"> / night</span>
+            </div>
+            <div style="display:flex; gap:4px; align-items:center;">
+              <span style="color:var(--gold);">★</span>
+              <span style="font-size:13px; color:var(--white);">4.8</span>
+              <span style="color:var(--muted); font-size:12px;">(24 reviews)</span>
+            </div>
+          </div>
+
+          <!-- Mini calendar -->
+          <div id="miniCalendar" style="margin-bottom:16px;"></div>
+
+          <!-- Date inputs -->
+          <div style="display:grid; grid-template-columns:1fr 1fr; border:1px solid var(--border); border-radius:8px; overflow:hidden; margin-bottom:12px;">
+            <div style="padding:12px; border-right:1px solid var(--border);">
+              <div style="font-size:10px; font-weight:600; color:var(--muted); text-transform:uppercase;">CHECK-IN</div>
+              <input type="date" id="checkIn" style="background:none; border:none; color:var(--white); font-size:14px; outline:none; width:100%;" min="{{ date('Y-m-d') }}">
+            </div>
+            <div style="padding:12px;">
+              <div style="font-size:10px; font-weight:600; color:var(--muted); text-transform:uppercase;">CHECK-OUT</div>
+              <input type="date" id="checkOut" style="background:none; border:none; color:var(--white); font-size:14px; outline:none; width:100%;">
+            </div>
+          </div>
+
+          <!-- Guests -->
+          <div style="border:1px solid var(--border); border-radius:8px; padding:12px; margin-bottom:16px; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <div style="font-size:10px; font-weight:600; color:var(--muted); text-transform:uppercase;">GUESTS</div>
+              <span id="guestDisplay" style="font-size:14px; color:var(--white);">1 guest</span>
+            </div>
+            <div style="display:flex; gap:8px; align-items:center;">
+              <button onclick="changeGuests(-1)" type="button" style="width:28px; height:28px; border-radius:50%; border:1px solid var(--border); background:none; color:var(--white); cursor:pointer; font-size:16px;">−</button>
+              <span id="guestCount" style="color:var(--white); font-size:14px;">1</span>
+              <button onclick="changeGuests(1)" type="button" style="width:28px; height:28px; border-radius:50%; border:1px solid var(--border); background:none; color:var(--white); cursor:pointer; font-size:16px;">+</button>
+            </div>
+          </div>
+
+          <!-- Price breakdown -->
+          <div id="pricingBreakdown" style="display:none; margin-bottom:16px; padding:16px; background:var(--navy3); border-radius:8px;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:14px; color:var(--muted);">
+              <span id="nightsLabel">KES 0 × 0 nights</span>
+              <span id="basePrice">KES 0</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:14px; color:var(--muted);">
+              <span>Cleaning fee</span>
+              <span id="cleaningFee">KES 1,500</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:14px; color:var(--muted);">
+              <span>EstateYard service fee (5%)</span>
+              <span id="serviceFee">KES 0</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; margin-top:12px; padding-top:12px; border-top:1px solid var(--border); font-size:16px; font-weight:600; color:var(--white);">
+              <span>Total</span>
+              <span id="totalPrice" style="color:var(--gold);">KES 0</span>
+            </div>
+          </div>
+
+          <a id="bookNowBtn" href="#" style="display:none;" class="btn btn-gold" style="width:100%; justify-content:center; font-size:16px; padding:14px;">Reserve Now</a>
+          <button id="selectDatesBtn" type="button" class="btn btn-gold" style="width:100%; justify-content:center; font-size:16px; padding:14px;">Check Availability</button>
+
+          <p style="text-align:center; font-size:12px; color:var(--muted); margin-top:12px;">You won't be charged yet</p>
+        </div>
+        @else
+        <!-- INSPECTION FORM for sale/rent -->
         <div style="background:var(--navy2); border:1px solid var(--border); border-radius:var(--radius); padding:24px; margin-bottom:16px;">
-          <h3 style="font-size:16px; font-weight:600; color:var(--white); margin-bottom:16px;">Book an Inspection</h3>
-          <form data-validate>
-            <div class="form-group">
-              <label class="form-label">Your Name</label>
-              <input type="text" class="form-control" placeholder="Full name" required>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Phone Number</label>
-              <input type="tel" class="form-control" placeholder="+254 700 000 000" required>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Email</label>
-              <input type="email" class="form-control" placeholder="you@example.com" required>
-            </div>
+          <h3 style="font-size:16px; font-weight:600; color:var(--white); margin-bottom:16px;">📅 Book an Inspection</h3>
+          @if(session('user_id'))
+          <form method="POST" action="{{ url('/inspections') }}">
+            @csrf
+            <input type="hidden" name="property_id" value="{{ $property->id }}">
             <div class="form-group">
               <label class="form-label">Preferred Date</label>
-              <input type="date" class="form-control" required>
+              <input type="date" name="scheduled_at" class="form-control" min="{{ date('Y-m-d', strtotime('+1 day')) }}" required>
             </div>
             <div class="form-group">
-              <label class="form-label">Preferred Time</label>
-              <select class="form-control">
-                <option>9:00 AM</option><option>10:00 AM</option><option>11:00 AM</option>
-                <option>2:00 PM</option><option>3:00 PM</option><option>4:00 PM</option>
-              </select>
+              <label class="form-label">Notes <span style="color:var(--muted); font-size:12px;">(optional)</span></label>
+              <textarea name="notes" class="form-control" rows="2" placeholder="Anything specific you'd like to check..."></textarea>
             </div>
-            <button type="submit" class="btn btn-gold" style="width:100%; justify-content:center; margin-bottom:10px;" onclick="showToast('Inspection request submitted!', 'green'); return false;">📅 Book Inspection</button>
-            <button type="button" class="btn btn-outline" style="width:100%; justify-content:center;">💬 Message Agent</button>
+            <button type="submit" class="btn btn-gold" style="width:100%; justify-content:center; margin-bottom:10px;">📅 Request Inspection</button>
           </form>
+          @else
+          <div style="text-align:center; padding:16px 0;">
+            <p style="color:var(--muted); font-size:14px; margin-bottom:16px;">Login to book an inspection for this property</p>
+            <a href="{{ url('/login') }}" class="btn btn-gold" style="width:100%; justify-content:center;">Login to Book</a>
+          </div>
+          @endif
+          <button type="button" class="btn btn-outline" style="width:100%; justify-content:center;">💬 Message Agent</button>
         </div>
+        @endif
 
         <!-- Agent Info -->
         <div style="background:var(--navy3); border:1px solid var(--border-dim); border-radius:var(--radius); padding:20px; margin-bottom:16px;">
@@ -206,3 +286,129 @@
   </div>
 </div>
 @endsection
+
+@push('scripts')
+@if(in_array($property->listing_type ?? 'sale', ['airbnb', 'hotel']))
+<script>
+const PROP_ID = {{ $property->id }};
+const PROP_PRICE = {{ $property->price ?? 0 }};
+let blockedDates = [];
+let ciDate = '', coDate = '';
+let guestCnt = 1;
+let calMonth = new Date(); calMonth.setDate(1);
+
+fetch('/bookings/availability/' + PROP_ID)
+  .then(r => r.json())
+  .then(d => { blockedDates = d; renderMiniCal(); renderBigCal(); });
+
+function renderMiniCal() {
+  const c = document.getElementById('miniCalendar');
+  if (!c) return;
+  c.innerHTML = '';
+  const m = new Date(calMonth);
+  c.appendChild(buildCal(m, true));
+}
+
+function renderBigCal() {
+  const c = document.getElementById('availabilityCalendar');
+  if (!c) return;
+  c.innerHTML = '';
+  for (let i = 0; i < 2; i++) {
+    const m = new Date(calMonth);
+    m.setMonth(m.getMonth() + i);
+    c.appendChild(buildCal(m, false));
+  }
+}
+
+function buildCal(monthDate, mini) {
+  const year = monthDate.getFullYear();
+  const month = monthDate.getMonth();
+  const monthName = monthDate.toLocaleDateString('en-US', {month:'long', year:'numeric'});
+  const div = document.createElement('div');
+  let html = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+    <span style="font-size:13px;font-weight:600;color:var(--white);">${monthName}</span>
+    ${!mini ? `<div style="display:flex;gap:6px;">
+      <button onclick="calMonth.setMonth(calMonth.getMonth()-1);renderBigCal();renderMiniCal();" style="background:none;border:1px solid var(--border);border-radius:6px;color:var(--muted);cursor:pointer;padding:2px 8px;">‹</button>
+      <button onclick="calMonth.setMonth(calMonth.getMonth()+1);renderBigCal();renderMiniCal();" style="background:none;border:1px solid var(--border);border-radius:6px;color:var(--muted);cursor:pointer;padding:2px 8px;">›</button>
+    </div>` : ''}
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center;">`;
+  ['S','M','T','W','T','F','S'].forEach(d => {
+    html += `<div style="font-size:10px;color:var(--muted);padding:3px;">${d}</div>`;
+  });
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  for (let i = 0; i < firstDay; i++) html += '<div></div>';
+  for (let d = 1; d <= daysInMonth; d++) {
+    const ds = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isBlk = blockedDates.includes(ds);
+    const isCI = ds === ciDate, isCO = ds === coDate;
+    const inRange = ciDate && coDate && ds > ciDate && ds < coDate;
+    const isPast = ds < new Date().toISOString().slice(0,10);
+    let bg = 'transparent', color = 'var(--text)', cursor = 'pointer', tdec = 'none';
+    if (isPast) { color='var(--muted2)'; cursor='default'; }
+    else if (isBlk) { color='var(--red)'; cursor='not-allowed'; tdec='line-through'; }
+    else if (isCI || isCO) { bg='var(--gold)'; color='var(--navy)'; }
+    else if (inRange) { bg='var(--gold-dim)'; color='var(--gold2)'; }
+    html += `<div onclick="${!isPast&&!isBlk?`calPick('${ds}')`:'return'}" style="padding:${mini?'4':'6'}px 2px;font-size:${mini?'11':'12'}px;border-radius:6px;background:${bg};color:${color};cursor:${cursor};text-decoration:${tdec};">${d}</div>`;
+  }
+  html += '</div>';
+  div.innerHTML = html;
+  return div;
+}
+
+function calPick(ds) {
+  if (!ciDate || (ciDate && coDate)) {
+    ciDate = ds; coDate = '';
+    document.getElementById('checkIn').value = ds;
+    document.getElementById('checkOut').value = '';
+  } else {
+    if (ds <= ciDate) { ciDate = ds; document.getElementById('checkIn').value = ds; }
+    else { coDate = ds; document.getElementById('checkOut').value = ds; updatePricing(); }
+  }
+  renderMiniCal(); renderBigCal();
+}
+
+document.getElementById('checkIn').addEventListener('change', function() { ciDate=this.value; renderMiniCal(); renderBigCal(); if(coDate) updatePricing(); });
+document.getElementById('checkOut').addEventListener('change', function() { coDate=this.value; renderMiniCal(); renderBigCal(); if(ciDate) updatePricing(); });
+
+function changeGuests(d) {
+  guestCnt = Math.max(1, Math.min(20, guestCnt+d));
+  document.getElementById('guestCount').textContent = guestCnt;
+  document.getElementById('guestDisplay').textContent = guestCnt + ' guest' + (guestCnt>1?'s':'');
+}
+
+function updatePricing() {
+  if (!ciDate || !coDate) return;
+  fetch(`/api/search/availability?property_id=${PROP_ID}&check_in=${ciDate}&check_out=${coDate}`)
+    .then(r => r.json())
+    .then(data => {
+      const p = data.pricing;
+      document.getElementById('pricingBreakdown').style.display = 'block';
+      document.getElementById('nightsLabel').textContent = `KES ${PROP_PRICE.toLocaleString()} × ${p.nights} night${p.nights!==1?'s':''}`;
+      document.getElementById('basePrice').textContent = 'KES ' + p.base_total.toLocaleString();
+      document.getElementById('cleaningFee').textContent = 'KES ' + p.cleaning_fee.toLocaleString();
+      document.getElementById('serviceFee').textContent = 'KES ' + p.service_fee.toLocaleString();
+      document.getElementById('totalPrice').textContent = 'KES ' + p.total.toLocaleString();
+
+      const btn = document.getElementById('bookNowBtn');
+      const selBtn = document.getElementById('selectDatesBtn');
+      if (data.available) {
+        btn.href = `/properties/${PROP_ID}/book?check_in=${ciDate}&check_out=${coDate}&guests=${guestCnt}`;
+        btn.style.display = 'flex';
+        selBtn.style.display = 'none';
+      } else {
+        btn.style.display = 'none';
+        selBtn.style.display = 'flex';
+        selBtn.textContent = '⚠ Dates Not Available';
+      }
+    });
+}
+
+document.getElementById('selectDatesBtn').addEventListener('click', function() {
+  if (ciDate && coDate) updatePricing();
+  else { alert('Please select check-in and check-out dates.'); }
+});
+</script>
+@endif
+@endpush

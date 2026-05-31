@@ -25,6 +25,7 @@
 </div>
 <div class="dash-nav-section">
   <div class="dash-nav-section-title">More</div>
+  <a href="{{ url('/dashboard/host-bookings') }}" class="dash-nav-item"><span class="dash-nav-icon">🏨</span> BnB Bookings</a>
   <a href="#" class="dash-nav-item"><span class="dash-nav-icon">🔧</span> Maintenance <span class="dash-nav-badge">4</span></a>
   <a href="#" class="dash-nav-item"><span class="dash-nav-icon">📂</span> Documents</a>
   <a href="#" class="dash-nav-item"><span class="dash-nav-icon">🔗</span> Referral Links</a>
@@ -88,7 +89,40 @@
     <div class="kpi-label">Maintenance Open</div>
     <div class="kpi-change down">{{ $maintenanceRequests->where('priority','urgent')->count() }} urgent</div>
   </div>
+  <div class="kpi-card">
+    <div class="kpi-icon">🏨</div>
+    @php $activeBookings = isset($activeBookingsCount) ? $activeBookingsCount : 0; @endphp
+    <div class="kpi-value">{{ $activeBookings }}</div>
+    <div class="kpi-label">Active Bookings</div>
+    <div class="kpi-change up"><a href="{{ url('/dashboard/host-bookings') }}" style="color:var(--gold); font-size:11px;">View all →</a></div>
+  </div>
 </div>
+
+@if(isset($upcomingBookings) && $upcomingBookings->count() > 0)
+<!-- UPCOMING BnB/HOTEL BOOKINGS -->
+<div class="table-card" style="margin-bottom:28px;">
+  <div class="table-card-header">
+    <div class="table-card-title">🏨 Upcoming Short-Stay Bookings</div>
+    <a href="{{ url('/dashboard/host-bookings') }}" class="btn btn-sm btn-outline">View All</a>
+  </div>
+  <table class="data-table">
+    <thead><tr><th>Guest</th><th>Property</th><th>Check-in</th><th>Check-out</th><th>Nights</th><th>Total</th><th>Status</th></tr></thead>
+    <tbody>
+      @foreach($upcomingBookings->take(5) as $bk)
+      <tr>
+        <td class="td-name">{{ $bk->guest->name ?? 'Guest' }}</td>
+        <td>{{ Str::limit($bk->property->title ?? '—', 25) }}</td>
+        <td style="font-family:var(--font-mono); font-size:12px;">{{ \Carbon\Carbon::parse($bk->check_in)->format('d M Y') }}</td>
+        <td style="font-family:var(--font-mono); font-size:12px;">{{ \Carbon\Carbon::parse($bk->check_out)->format('d M Y') }}</td>
+        <td style="text-align:center;">{{ $bk->nights }}</td>
+        <td class="td-price">KES {{ number_format($bk->total_price) }}</td>
+        <td><span class="status-pill status-{{ in_array($bk->status,['confirmed','paid']) ? 'active' : $bk->status }}">{{ strtoupper($bk->status) }}</span></td>
+      </tr>
+      @endforeach
+    </tbody>
+  </table>
+</div>
+@endif
 
 <!-- QUICK ACTIONS -->
 <div style="display:flex; gap:10px; margin-bottom:28px; flex-wrap:wrap;">

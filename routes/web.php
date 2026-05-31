@@ -18,6 +18,9 @@ use App\Http\Controllers\ReferralController;
 use App\Http\Controllers\EscrowController;
 use App\Http\Controllers\PdfController;
 use App\Http\Controllers\SearchController;
+use App\Http\Controllers\BookingController;
+use App\Http\Controllers\HotelRoomController;
+use App\Http\Controllers\PricingRuleController;
 use App\Http\Controllers\Admin\KycController;
 use App\Http\Controllers\Admin\PropertyModerationController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
@@ -146,3 +149,31 @@ Route::middleware(['auth.session'])->group(function () {
 
 // Search suggestions (public, no auth)
 Route::get('/api/search/suggestions', [SearchController::class, 'suggestions'])->name('search.suggestions');
+
+// BOOKING — public endpoints (no auth)
+Route::get('/bookings/availability/{propertyId}', [BookingController::class, 'blockedDates']);
+Route::get('/api/search/availability', [BookingController::class, 'checkAvailability']);
+
+// BOOKING — auth required
+Route::middleware(['auth.session'])->group(function () {
+    Route::get('/properties/{id}/book', [BookingController::class, 'create'])->name('booking.create');
+    Route::post('/bookings', [BookingController::class, 'store'])->name('booking.store');
+    Route::get('/bookings/{id}/payment', [BookingController::class, 'payment'])->name('booking.payment');
+    Route::post('/bookings/{id}/payment', [BookingController::class, 'processPayment'])->name('booking.pay');
+    Route::get('/bookings/{id}/confirmation', [BookingController::class, 'confirmation'])->name('booking.confirmation');
+    Route::post('/bookings/{id}/cancel', [BookingController::class, 'cancel'])->name('booking.cancel');
+    Route::get('/dashboard/bookings', [BookingController::class, 'myBookings'])->name('dashboard.bookings');
+    Route::get('/dashboard/host-bookings', [BookingController::class, 'myHostBookings'])->name('dashboard.host-bookings');
+    Route::post('/bookings/{id}/review', [BookingController::class, 'storeReview'])->name('booking.review');
+
+    // Hotel rooms (owner)
+    Route::get('/properties/{propertyId}/rooms', [HotelRoomController::class, 'index']);
+    Route::post('/properties/{propertyId}/rooms', [HotelRoomController::class, 'store']);
+    Route::put('/properties/{propertyId}/rooms/{roomId}', [HotelRoomController::class, 'update']);
+    Route::delete('/properties/{propertyId}/rooms/{roomId}', [HotelRoomController::class, 'destroy']);
+
+    // Pricing rules
+    Route::get('/properties/{propertyId}/pricing', [PricingRuleController::class, 'index']);
+    Route::post('/properties/{propertyId}/pricing', [PricingRuleController::class, 'store']);
+    Route::delete('/properties/{propertyId}/pricing/{ruleId}', [PricingRuleController::class, 'destroy']);
+});

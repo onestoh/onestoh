@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Mail\InspectionBooked;
+use App\Models\Booking;
 use App\Models\Inspection;
 use App\Models\Property;
 use App\Models\User;
+use App\Services\BookingService;
 use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -32,6 +34,31 @@ class InspectionController extends Controller
             'notes'         => $request->notes,
             'status'        => 'pending',
         ]);
+
+        // Create a booking record for the inspection slot
+        try {
+            $scheduledDate = date('Y-m-d', strtotime($request->scheduled_at));
+            Booking::create([
+                'property_id'          => $property->id,
+                'room_id'              => null,
+                'guest_id'             => $userId,
+                'host_id'              => $property->user_id,
+                'type'                 => 'inspection',
+                'check_in'             => $scheduledDate,
+                'check_out'            => $scheduledDate,
+                'guests_count'         => 1,
+                'nights'               => 0,
+                'total_price'          => 0,
+                'base_price_per_night' => 0,
+                'cleaning_fee'         => 0,
+                'service_fee'          => 0,
+                'status'               => 'confirmed',
+                'special_requests'     => $request->notes,
+                'auto_confirmed'       => true,
+            ]);
+        } catch (\Throwable $e) {
+            Log::warning('Inspection booking record creation failed: ' . $e->getMessage());
+        }
 
         // Notify property owner via NotificationService
         NotificationService::send(

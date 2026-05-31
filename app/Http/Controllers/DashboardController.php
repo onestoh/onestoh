@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Auction;
+use App\Models\Booking;
 use App\Models\EscrowTransaction;
 use App\Models\Lease;
 use App\Models\MaintenanceRequest;
@@ -98,8 +99,22 @@ class DashboardController extends Controller
             ->take(10)
             ->get();
 
+        // Bookings for this landlord's properties
+        $propertyIds = $properties->pluck('id')->toArray();
+        $activeBookingsCount = Booking::whereIn('property_id', $propertyIds)
+            ->whereIn('status', ['pending', 'confirmed', 'paid', 'checked_in'])
+            ->count();
+        $upcomingBookings = Booking::with(['property', 'guest'])
+            ->whereIn('property_id', $propertyIds)
+            ->whereIn('status', ['confirmed', 'paid', 'checked_in'])
+            ->where('check_in', '>=', now()->toDateString())
+            ->orderBy('check_in')
+            ->take(10)
+            ->get();
+
         return view('dashboard.landlord.index', compact(
-            'properties', 'leases', 'rentPaymentsByStatus', 'maintenanceRequests'
+            'properties', 'leases', 'rentPaymentsByStatus', 'maintenanceRequests',
+            'activeBookingsCount', 'upcomingBookings'
         ));
     }
 
