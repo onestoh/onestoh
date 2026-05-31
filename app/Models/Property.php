@@ -92,4 +92,29 @@ class Property extends Model
     {
         return $this->hasMany(Auction::class);
     }
+
+    public function bookings()
+    {
+        return $this->hasMany(Booking::class);
+    }
+
+    public function hotelRooms()
+    {
+        return $this->hasMany(HotelRoom::class);
+    }
+
+    public function pricingRules()
+    {
+        return $this->hasMany(PropertyPricingRule::class);
+    }
+
+    public function availabilities()
+    {
+        return $this->hasMany(PropertyAvailability::class);
+    }
+
+    public function reviews()
+    {
+        return $this->hasMany(BookingReview::class);
+    }
 }
