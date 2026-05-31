@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\RentPaymentReceived;
 use App\Models\Lease;
 use App\Models\RentPayment;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class RentPaymentController extends Controller
 {
@@ -93,6 +96,36 @@ class RentPaymentController extends Controller
                     'status'  => 'paid',
                     'paid_at' => now(),
                 ]);
+
+                // Fire mail notification
+                try {
+                    $tenant = $payment->tenant;
+                    if ($tenant?->email) {
+                        Mail::to($tenant->email)->queue(new RentPaymentReceived($payment));
+                    }
+                } catch (\Throwable $e) {
+                    Log::warning('RentPaymentReceived mail failed: ' . $e->getMessage());
+                }
+
+                // In-app notifications
+                try {
+                    NotificationService::send(
+                        $payment->tenant_id,
+                        'Rent Payment Confirmed',
+                        'Your payment of KES ' . number_format($payment->amount, 0) . ' has been received.',
+                        'payment',
+                        '/dashboard/tenant'
+                    );
+                    NotificationService::send(
+                        $payment->landlord_id,
+                        'Rent Payment Received',
+                        'Tenant has paid KES ' . number_format($payment->amount, 0) . ' for your property.',
+                        'payment',
+                        '/dashboard/landlord'
+                    );
+                } catch (\Throwable $e) {
+                    Log::warning('Rent payment notification failed: ' . $e->getMessage());
+                }
             }
         }
 

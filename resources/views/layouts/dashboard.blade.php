@@ -66,7 +66,9 @@
         <!-- Notifications -->
         <div style="position:relative;">
           <button class="icon-btn" onclick="toggleNotifs()">🔔</button>
-          <span style="position:absolute; top:-4px; right:-4px; background:var(--red); color:white; border-radius:50%; width:18px; height:18px; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:600;">3</span>
+          @if(($unreadNotifCount ?? 0) > 0)
+          <span style="position:absolute; top:-4px; right:-4px; background:var(--red); color:white; border-radius:50%; width:18px; height:18px; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:600;">{{ $unreadNotifCount > 9 ? '9+' : $unreadNotifCount }}</span>
+          @endif
 
           <!-- Notification Dropdown -->
           <div id="notifDropdown" style="display:none; position:absolute; right:0; top:50px; width:340px; background:var(--navy2); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); z-index:300;">
@@ -75,15 +77,28 @@
               <button onclick="document.getElementById('notifDropdown').style.display='none'" style="background:none; border:none; color:var(--muted); cursor:pointer;">✕</button>
             </div>
             <div style="max-height:320px; overflow-y:auto;">
-              @for($i=0; $i<3; $i++)
-              <div style="padding:14px 20px; border-bottom:1px solid var(--border-dim); display:flex; gap:12px; cursor:pointer; transition:background .2s;" onmouseover="this.style.background='var(--gold-dim)'" onmouseout="this.style.background='transparent'">
-                <span style="font-size:20px; flex-shrink:0; margin-top:2px;">{{ ['💳','🏠','✅'][$i] }}</span>
+              @php
+                $recentNotifs = [];
+                if (session('user_id')) {
+                    try {
+                        $recentNotifs = \App\Models\NotificationLog::where('user_id', session('user_id'))
+                            ->latest()->take(3)->get();
+                    } catch (\Throwable $e) {}
+                }
+                $typeIcons = ['payment'=>'💳','inspection'=>'🏠','document'=>'✅','auction'=>'🔨','message'=>'💬','system'=>'🔔'];
+              @endphp
+              @forelse($recentNotifs as $notif)
+              <div style="padding:14px 20px; border-bottom:1px solid var(--border-dim); display:flex; gap:12px; cursor:pointer; transition:background .2s;{{ !$notif->is_read ? 'background:rgba(201,168,76,0.04);' : '' }}" onmouseover="this.style.background='var(--gold-dim)'" onmouseout="this.style.background='{{ !$notif->is_read ? 'rgba(201,168,76,0.04)' : 'transparent' }}'">
+                <span style="font-size:20px; flex-shrink:0; margin-top:2px;">{{ $typeIcons[$notif->type] ?? '🔔' }}</span>
                 <div>
-                  <div style="font-size:13px; color:var(--white); font-weight:500;">{{ ['Rent payment received', 'New inspection booking', 'Document verified'][$i] }}</div>
-                  <div style="font-size:11px; color:var(--muted); margin-top:2px; font-family:var(--font-mono);">{{ ['2 min ago', '1 hour ago', 'Yesterday'][$i] }}</div>
+                  <div style="font-size:13px; color:var(--white); font-weight:{{ $notif->is_read ? '400' : '600' }};">{{ $notif->title }}</div>
+                  <div style="font-size:12px; color:var(--muted); margin-top:2px; line-height:1.4;">{{ Str::limit($notif->body, 60) }}</div>
+                  <div style="font-size:11px; color:var(--muted); margin-top:2px; font-family:var(--font-mono);">{{ $notif->created_at?->diffForHumans() }}</div>
                 </div>
               </div>
-              @endfor
+              @empty
+              <div style="padding:24px 20px; text-align:center; color:var(--muted); font-size:13px;">No notifications yet</div>
+              @endforelse
             </div>
             <div style="padding:12px 20px; text-align:center; border-top:1px solid var(--border-dim);">
               <a href="{{ url('/dashboard/notifications') }}" style="font-size:13px; color:var(--gold);">View all notifications</a>

@@ -2,10 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\InspectionBooked;
 use App\Models\Inspection;
-use App\Models\NotificationLog;
 use App\Models\Property;
+use App\Models\User;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class InspectionController extends Controller
 {
@@ -29,13 +33,29 @@ class InspectionController extends Controller
             'status'        => 'pending',
         ]);
 
-        // Notify property owner
-        NotificationLog::create([
-            'user_id' => $property->user_id,
-            'type'    => 'inspection_request',
-            'message' => "Inspection requested for \"{$property->title}\" on " . date('d M Y', strtotime($request->scheduled_at)) . ".",
-            'data'    => json_encode(['inspection_id' => $inspection->id]),
-        ]);
+        // Notify property owner via NotificationService
+        NotificationService::send(
+            $property->user_id,
+            'Inspection Request',
+            "Inspection requested for \"{$property->title}\" on " . date('d M Y', strtotime($request->scheduled_at)) . ".",
+            'inspection',
+            '/dashboard'
+        );
+
+        // Send mail to property owner and requester
+        try {
+            $owner = User::find($property->user_id);
+            $requester = User::find($userId);
+            $inspection->load('property');
+            if ($owner?->email) {
+                Mail::to($owner->email)->queue(new InspectionBooked($inspection));
+            }
+            if ($requester && $requester->id !== $owner?->id && $requester->email) {
+                Mail::to($requester->email)->queue(new InspectionBooked($inspection));
+            }
+        } catch (\Throwable $e) {
+            Log::warning('InspectionBooked mail failed: ' . $e->getMessage());
+        }
 
         if ($request->expectsJson()) {
             return response()->json([

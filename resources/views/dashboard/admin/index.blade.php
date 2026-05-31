@@ -12,15 +12,14 @@
 </div>
 <div class="dash-nav-section">
   <div class="dash-nav-section-title">Users</div>
-  <a href="#" class="dash-nav-item"><span class="dash-nav-icon">👥</span> All Users <span class="dash-nav-badge">24</span></a>
-  <a href="#" class="dash-nav-item"><span class="dash-nav-icon">✅</span> KYC Queue <span class="dash-nav-badge">7</span></a>
+  <a href="{{ url('/admin/users') }}" class="dash-nav-item"><span class="dash-nav-icon">👥</span> User Management</a>
+  <a href="{{ url('/admin/kyc') }}" class="dash-nav-item"><span class="dash-nav-icon">✅</span> KYC Queue</a>
   <a href="#" class="dash-nav-item"><span class="dash-nav-icon">🏷️</span> Verification Badges</a>
   <a href="#" class="dash-nav-item"><span class="dash-nav-icon">🚫</span> Suspended</a>
 </div>
 <div class="dash-nav-section">
   <div class="dash-nav-section-title">Marketplace</div>
-  <a href="#" class="dash-nav-item"><span class="dash-nav-icon">🏠</span> All Listings</a>
-  <a href="#" class="dash-nav-item"><span class="dash-nav-icon">⏳</span> Pending Review <span class="dash-nav-badge">12</span></a>
+  <a href="{{ url('/admin/properties') }}" class="dash-nav-item"><span class="dash-nav-icon">🏠</span> Property Moderation</a>
   <a href="#" class="dash-nav-item"><span class="dash-nav-icon">🔍</span> Duplicate Detection</a>
 </div>
 <div class="dash-nav-section">
@@ -33,7 +32,8 @@
 <div class="dash-nav-section">
   <div class="dash-nav-section-title">Platform</div>
   <a href="#" class="dash-nav-item"><span class="dash-nav-icon">🔨</span> Auctions</a>
-  <a href="#" class="dash-nav-item"><span class="dash-nav-icon">⚙️</span> Platform Config</a>
+  <a href="{{ url('/dashboard/messages') }}" class="dash-nav-item"><span class="dash-nav-icon">💬</span> Messages</a>
+  <a href="{{ url('/dashboard/settings') }}" class="dash-nav-item"><span class="dash-nav-icon">⚙️</span> Settings</a>
   <a href="#" class="dash-nav-item"><span class="dash-nav-icon">📡</span> System Health</a>
   <a href="#" class="dash-nav-item"><span class="dash-nav-icon">📝</span> Audit Logs</a>
 </div>

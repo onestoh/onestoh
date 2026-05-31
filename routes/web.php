@@ -15,6 +15,12 @@ use App\Http\Controllers\MaintenanceController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\VerificationController;
 use App\Http\Controllers\ReferralController;
+use App\Http\Controllers\EscrowController;
+use App\Http\Controllers\PdfController;
+use App\Http\Controllers\SearchController;
+use App\Http\Controllers\Admin\KycController;
+use App\Http\Controllers\Admin\PropertyModerationController;
+use App\Http\Controllers\Admin\UserController as AdminUserController;
 
 // PUBLIC ROUTES
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -105,4 +111,38 @@ Route::middleware(['auth.session'])->group(function () {
 
     // Referrals
     Route::post('/referrals/generate', [ReferralController::class, 'generate'])->name('referrals.generate');
+
+    // PDF Generation
+    Route::get('/pdf/lease/{id}', [PdfController::class, 'leaseAgreement'])->name('pdf.lease');
+    Route::get('/pdf/receipt/{id}', [PdfController::class, 'rentReceipt'])->name('pdf.receipt');
+    Route::get('/pdf/statement/{userId}/{month}', [PdfController::class, 'ownerStatement'])
+        ->middleware('role:landlord,admin')
+        ->name('pdf.statement');
+
+    // Search
+    Route::get('/search', [SearchController::class, 'index'])->name('search');
+
+    // Escrow
+    Route::post('/escrow', [EscrowController::class, 'initiate'])->name('escrow.initiate');
+    Route::put('/escrow/{id}/release', [EscrowController::class, 'release'])->name('escrow.release');
+    Route::put('/escrow/{id}/dispute', [EscrowController::class, 'dispute'])->name('escrow.dispute');
+
+    // Admin workflows
+    Route::middleware('role:admin')->prefix('admin')->group(function () {
+        Route::get('/kyc', [KycController::class, 'index'])->name('admin.kyc.index');
+        Route::post('/kyc/{id}/approve', [KycController::class, 'approve'])->name('admin.kyc.approve');
+        Route::post('/kyc/{id}/reject', [KycController::class, 'reject'])->name('admin.kyc.reject');
+
+        Route::get('/properties', [PropertyModerationController::class, 'index'])->name('admin.properties.index');
+        Route::post('/properties/{id}/approve', [PropertyModerationController::class, 'approve'])->name('admin.properties.approve');
+        Route::post('/properties/{id}/suspend', [PropertyModerationController::class, 'suspend'])->name('admin.properties.suspend');
+        Route::post('/properties/{id}/feature', [PropertyModerationController::class, 'feature'])->name('admin.properties.feature');
+
+        Route::get('/users', [AdminUserController::class, 'index'])->name('admin.users.index');
+        Route::get('/users/{id}', [AdminUserController::class, 'show'])->name('admin.users.show');
+        Route::post('/users/{id}/toggle-active', [AdminUserController::class, 'toggleActive'])->name('admin.users.toggleActive');
+    });
 });
+
+// Search suggestions (public, no auth)
+Route::get('/api/search/suggestions', [SearchController::class, 'suggestions'])->name('search.suggestions');
