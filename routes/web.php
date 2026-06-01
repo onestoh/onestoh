@@ -42,9 +42,13 @@ Route::get('/auctions/{id}', [AuctionController::class, 'show'])->name('auction.
 
 // Auth
 Route::get('/login', [AuthController::class, 'loginForm'])->name('login');
-Route::post('/login', [AuthController::class, 'login'])->name('login.post');
+Route::post('/login', [AuthController::class, 'login'])
+    ->middleware('throttle:5,1')
+    ->name('login.post');
 Route::get('/register', [AuthController::class, 'registerForm'])->name('register');
-Route::post('/register', [AuthController::class, 'register'])->name('register.post');
+Route::post('/register', [AuthController::class, 'register'])
+    ->middleware('throttle:3,1')
+    ->name('register.post');
 Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // Referral tracking (public)
@@ -165,6 +169,8 @@ Route::middleware(['auth.session'])->group(function () {
     Route::get('/dashboard/bookings', [BookingController::class, 'myBookings'])->name('dashboard.bookings');
     Route::get('/dashboard/host-bookings', [BookingController::class, 'myHostBookings'])->name('dashboard.host-bookings');
     Route::post('/bookings/{id}/review', [BookingController::class, 'storeReview'])->name('booking.review');
+    Route::post('/bookings/{id}/checkin', [BookingController::class, 'checkIn'])->name('booking.checkin');
+    Route::post('/bookings/{id}/checkout', [BookingController::class, 'checkOut'])->name('booking.checkout');
 
     // Hotel rooms (owner)
     Route::get('/properties/{propertyId}/rooms', [HotelRoomController::class, 'index']);

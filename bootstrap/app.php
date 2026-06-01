@@ -17,6 +17,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'auth.session' => \App\Http\Middleware\AuthMiddleware::class,
             'role' => \App\Http\Middleware\RoleMiddleware::class,
         ]);
+        $middleware->throttle([
+            'api' => ['limit' => 60, 'by' => 'ip'],
+        ]);
+        $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Mail\WelcomeEmail;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -20,19 +21,34 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
+            'email'    => 'required|email|max:255',
+            'password' => 'required|string|max:255',
         ]);
+
+        $ip        = $request->ip();
+        $cacheKey  = "login_attempts_{$ip}";
+        $attempts  = Cache::get($cacheKey, 0);
+
+        if ($attempts >= 10) {
+            $this->logSecurityEvent('LOGIN_BLOCKED', ['email' => $request->email]);
+            return back()->withErrors(['email' => 'Too many login attempts. Try again in 15 minutes.'])->withInput();
+        }
 
         $user = User::where('email', $request->email)->first();
 
         if (!$user || !Hash::check($request->password, $user->password)) {
+            Cache::put($cacheKey, $attempts + 1, now()->addMinutes(15));
+            $this->logSecurityEvent('LOGIN_FAILED', ['email' => $request->email, 'attempts' => $attempts + 1]);
             return back()->withErrors(['email' => 'Invalid email or password.'])->withInput();
         }
 
         if (!$user->is_active) {
+            $this->logSecurityEvent('LOGIN_INACTIVE', ['email' => $request->email]);
             return back()->withErrors(['email' => 'Your account has been deactivated.'])->withInput();
         }
+
+        Cache::forget($cacheKey);
+        $this->logSecurityEvent('LOGIN_SUCCESS', ['email' => $request->email, 'user_id' => $user->id]);
 
         session([
             'user_id'   => $user->id,
