@@ -140,7 +140,7 @@
   @stack('scripts')
 
   <!-- WhatsApp Support -->
-  <a href="https://wa.me/254700000000?text=Hello%20EstateYard%20Support%2C%20I%20need%20help%20with..."
+  <a href="https://wa.me/{{ config('estateyard.whatsapp_support') }}?text=Hello%20EstateYard%20Support%2C%20I%20need%20help%20with..."
      target="_blank" rel="noopener noreferrer"
      style="position:fixed;bottom:28px;right:28px;z-index:9998;width:56px;height:56px;border-radius:50%;background:#25D366;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(37,211,102,0.4);text-decoration:none;transition:transform .2s,box-shadow .2s;"
      onmouseover="this.style.transform='scale(1.1)';this.style.boxShadow='0 6px 28px rgba(37,211,102,0.6)'"

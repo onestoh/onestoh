@@ -1,58 +1,125 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# EstateYard ERP Platform
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A comprehensive real estate ERP platform built on Laravel 13 and PHP 8.4, serving the Kenyan property market. EstateYard connects landlords, tenants, brokers, developers, auctioneers, investors, valuers, surveyors, and property managers on a single unified platform.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Features
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### Phase 1 — Core Marketplace
+- Property listings (sale, rent, airbnb, hotel, auction)
+- Advanced search and filtering by county, type, price range
+- Property detail pages with image gallery and maps
+- User registration for 13 distinct roles
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### Phase 2 — Lease & Rent Management
+- Digital lease creation and signing
+- Automated rent payment tracking (M-Pesa, card, bank)
+- Overdue detection and reminders
+- Maintenance request ticketing
 
-## Learning Laravel
+### Phase 3 — Auctions & Escrow
+- Live auction bidding with real-time bid updates
+- Upcoming and ended auction management
+- Escrow transaction tracking
+- Bid history and winner tracking
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### Phase 4 — Airbnb & Hotel Bookings
+- Short-stay (Airbnb) and hotel room bookings
+- Calendar availability blocking
+- M-Pesa payment integration
+- Booking confirmation and check-in flow
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### Phase 5 — Professional Dashboards
+- 13 role-specific dashboards (admin, landlord, tenant, broker, developer, valuer, surveyor, auctioneer, investor, corporate, property manager, finance, promoter)
+- Developer project tracking (units sold vs. total)
+- Valuation and survey job management
+- Finance overview with escrow and rent summaries
+- PDF report generation
+- Referral program with earnings tracking
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+---
 
-## Agentic Development
+## Tech Stack
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+- **Framework**: Laravel 13
+- **Language**: PHP 8.4
+- **Database**: SQLite (dev) / MySQL (production)
+- **Auth**: Custom session-based auth
+- **API**: Laravel Sanctum REST API
+- **PDF**: DomPDF (barryvdh/laravel-dompdf)
+- **Frontend**: Blade templates, Vanilla JS, Tailwind CSS
+- **Storage**: Laravel Storage (local/S3)
+
+---
+
+## Installation
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+git clone https://github.com/onestoh/onestoh.git
+cd onestoh
+cp .env.example .env
+composer install
+php artisan key:generate
+php artisan migrate:fresh --seed
+php artisan storage:link
+php artisan serve
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+Visit `http://localhost:8000`
 
-## Contributing
+---
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## Demo Credentials
 
-## Code of Conduct
+All accounts use password: `password`
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+| Role | Email |
+|------|-------|
+| Admin | admin1@estateyard.co.ke |
+| Landlord | landlord1@estateyard.co.ke |
+| Tenant | tenant1@estateyard.co.ke |
+| Broker (Licensed) | broker1@estateyard.co.ke |
+| Broker (Unlicensed/Promoter) | promoter1@estateyard.co.ke |
+| Developer | developer1@estateyard.co.ke |
+| Valuer | valuer1@estateyard.co.ke |
+| Surveyor | surveyor1@estateyard.co.ke |
+| Auctioneer | auctioneer1@estateyard.co.ke |
+| Investor | investor1@estateyard.co.ke |
+| Corporate | corporate1@estateyard.co.ke |
+| Property Manager | manager1@estateyard.co.ke |
+| Finance | finance1@estateyard.co.ke |
 
-## Security Vulnerabilities
+---
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## API Endpoints
+
+```
+GET  /api/v1/properties              List properties (filterable)
+GET  /api/v1/properties/{id}         Property detail
+GET  /api/v1/auctions                List auctions
+GET  /api/v1/auctions/{id}           Auction detail
+GET  /api/search/suggestions?q=      Search autocomplete
+GET  /bookings/availability/{id}     Property availability calendar
+POST /bookings                       Create a booking
+POST /bookings/{id}/payment          Process payment
+```
+
+---
+
+## Phase Roadmap
+
+| Phase | Status | Description |
+|-------|--------|-------------|
+| 1 | Done | Marketplace, listings, search, public pages |
+| 2 | Done | Lease management, rent payments, maintenance |
+| 3 | Done | Auctions, bidding, escrow |
+| 4 | Done | Airbnb/hotel bookings, availability calendar |
+| 5 | Done | All 13 dashboards, PDF reports, referrals |
+| 6 | Planned | Mobile app (React Native), SMS notifications |
+
+---
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+MIT License — see [LICENSE](LICENSE) for details.

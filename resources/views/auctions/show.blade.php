@@ -10,7 +10,7 @@
         <div style="display:flex; align-items:center; gap:10px; margin-bottom:20px;">
           <a href="{{ url('/auctions') }}" style="color:var(--muted); font-size:13px;">← All Auctions</a>
           <span style="color:var(--muted);">/</span>
-          <span style="font-size:13px; color:var(--muted);">Auction #{{ $id }}</span>
+          <span style="font-size:13px; color:var(--muted);">Auction #{{ $auction->id }}</span>
         </div>
 
         <!-- Property Info -->

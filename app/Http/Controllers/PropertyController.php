@@ -14,7 +14,7 @@ class PropertyController extends Controller
         'bedsitter', 'mansion', 'maisonette',
     ];
 
-    private array $listingTypes = ['sale', 'rent', 'lease', 'auction', 'off_plan'];
+    private array $listingTypes = ['sale', 'rent', 'airbnb', 'hotel', 'auction'];
 
     private array $counties = [
         'Nairobi', 'Mombasa', 'Kisumu', 'Nakuru', 'Kiambu', 'Machakos',

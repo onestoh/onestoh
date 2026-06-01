@@ -181,8 +181,14 @@ class DashboardController extends Controller
             ->latest()
             ->get();
 
+        $myBookings = Booking::where('guest_id', $userId)
+            ->with('property')
+            ->latest()
+            ->take(5)
+            ->get();
+
         return view('dashboard.tenant.index', compact(
-            'activeLease', 'upcomingPayment', 'paymentHistory', 'maintenanceRequests'
+            'activeLease', 'upcomingPayment', 'paymentHistory', 'maintenanceRequests', 'myBookings'
         ));
     }
 
