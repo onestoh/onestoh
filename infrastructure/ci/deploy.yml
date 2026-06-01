@@ -1,0 +1,82 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main        # deploy to production
+      - develop     # deploy to staging
+
+jobs:
+  test-api:
+    name: API Tests
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_DATABASE: theonlineyard_test
+          MYSQL_USER: test_user
+          MYSQL_PASSWORD: test_pass
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: pdo_mysql, redis
+      - name: Install dependencies
+        run: cd apps/api && composer install --no-interaction --prefer-dist
+      - name: Run tests
+        run: cd apps/api && php artisan test --parallel
+        env:
+          DB_CONNECTION: mysql
+          DB_HOST: 127.0.0.1
+          DB_DATABASE: theonlineyard_test
+          DB_USERNAME: test_user
+          DB_PASSWORD: test_pass
+
+  test-web:
+    name: Web Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: apps/web/package-lock.json
+      - name: Install dependencies
+        run: cd apps/web && npm ci
+      - name: Type check
+        run: cd apps/web && npm run type-check
+      - name: Lint
+        run: cd apps/web && npm run lint
+      - name: Build
+        run: cd apps/web && npm run build
+
+  deploy-staging:
+    name: Deploy to Staging
+    needs: [test-api, test-web]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/develop'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy to staging server
+        run: echo "Add deployment steps here (rsync, SSH, or platform-specific CLI)"
+
+  deploy-production:
+    name: Deploy to Production
+    needs: [test-api, test-web]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy to production server
+        run: echo "Add deployment steps here"
