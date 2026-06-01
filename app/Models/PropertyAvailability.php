@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class PropertyAvailability extends Model
 {
+    protected $table = 'property_availability';
     protected $guarded = [];
 
     public function property()

@@ -15,7 +15,7 @@ return new class extends Migration
             $table->string('slug')->unique();
             $table->text('description');
             $table->enum('type', ['house','apartment','land','commercial','airbnb','hotel','villa','office']);
-            $table->enum('listing_type', ['sale','rent','airbnb','auction']);
+            $table->enum('listing_type', ['sale','rent','airbnb','hotel','auction']);
             $table->enum('status', ['active','pending','sold','rented','draft','suspended'])->default('active');
             $table->decimal('price', 15, 2);
             $table->enum('price_period', ['night','month','year'])->nullable();
