@@ -123,40 +123,74 @@ class BookingService
     }
 
     /**
-     * Confirm + pay a booking: block dates, notify host, update status
+     * Confirm + pay a booking: block dates, notify host/guest, update status
      */
     public static function confirm(Booking $booking, string $paymentMethod, string $paymentRef): Booking
     {
         return DB::transaction(function () use ($booking, $paymentMethod, $paymentRef) {
             $booking->update([
-                'status'            => 'confirmed',
-                'payment_method'    => $paymentMethod,
-                'payment_ref'       => $paymentRef,
-                'paid_at'           => now(),
-                'host_notified_at'  => now(),
+                'status'           => 'confirmed',
+                'payment_method'   => $paymentMethod,
+                'payment_ref'      => $paymentRef,
+                'paid_at'          => now(),
+                'host_notified_at' => now(),
             ]);
 
             // Block all dates in range
             $dates = self::getDateRange($booking->check_in, $booking->check_out);
             foreach ($dates as $date) {
-                PropertyAvailability::firstOrCreate([
-                    'property_id'  => $booking->property_id,
-                    'blocked_date' => $date,
-                ], [
-                    'reason'     => 'booked',
-                    'booking_id' => $booking->id,
-                ]);
+                PropertyAvailability::firstOrCreate(
+                    ['property_id' => $booking->property_id, 'blocked_date' => $date],
+                    ['reason' => 'booked', 'booking_id' => $booking->id]
+                );
             }
 
-            // Notify host
+            $guest    = \App\Models\User::find($booking->guest_id);
+            $host     = \App\Models\User::find($booking->host_id);
+            $property = \App\Models\Property::find($booking->property_id);
+            $ref      = 'BOOK-' . str_pad($booking->id, 6, '0', STR_PAD_LEFT) . '-' . now()->format('Ymd');
+
             try {
+                // 1. Notify HOST — new booking received
                 NotificationService::send(
                     $booking->host_id,
-                    'New Booking Confirmed',
-                    'Your property has a new booking from ' . optional($booking->guest)->name . ' for ' . $booking->nights . ' nights.',
+                    'New Booking Confirmed!',
+                    "Booking #{$ref}: " . optional($guest)->name . " booked " . optional($property)->title . " · Check-in: {$booking->check_in} · Check-out: {$booking->check_out} · {$booking->nights} nights · KES " . number_format($booking->total_price) . " received via " . strtoupper($paymentMethod),
                     'payment',
                     '/dashboard/host-bookings'
                 );
+
+                // 2. Notify GUEST — booking confirmed
+                NotificationService::send(
+                    $booking->guest_id,
+                    'Booking Confirmed!',
+                    "Your booking at " . optional($property)->title . " is confirmed. Ref: {$ref}. Check-in: {$booking->check_in}. Check-out: {$booking->check_out}. Total paid: KES " . number_format($booking->total_price),
+                    'payment',
+                    '/dashboard/bookings'
+                );
+
+                // 3. Notify HOST — calendar updated automatically
+                NotificationService::send(
+                    $booking->host_id,
+                    'Calendar Updated Automatically',
+                    "Dates {$booking->check_in} to {$booking->check_out} have been blocked on your calendar. No action required.",
+                    'system',
+                    '/dashboard/host-bookings'
+                );
+
+                // 4. Send email (non-blocking)
+                try {
+                    \Illuminate\Support\Facades\Mail::queue(new \App\Mail\RentPaymentReceived(
+                        \App\Models\RentPayment::make([
+                            'amount'          => $booking->total_price,
+                            'month_year'      => now()->format('Y-m'),
+                            'payment_method'  => $paymentMethod,
+                            'transaction_ref' => $paymentRef,
+                            'status'          => 'paid',
+                        ])
+                    ));
+                } catch (\Throwable $e) {}
+
             } catch (\Throwable $e) {
                 \Illuminate\Support\Facades\Log::warning('BookingService notify failed: ' . $e->getMessage());
             }

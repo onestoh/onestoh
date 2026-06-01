@@ -7,6 +7,7 @@ use App\Models\BookingReview;
 use App\Models\HotelRoom;
 use App\Models\Property;
 use App\Services\BookingService;
+use App\Services\NotificationService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -274,5 +275,41 @@ class BookingController extends Controller
         );
 
         return redirect()->back()->with('success', 'Review submitted. Thank you!');
+    }
+
+    /**
+     * POST /bookings/{id}/checkin
+     */
+    public function checkIn(Request $request, $id)
+    {
+        $booking = Booking::findOrFail($id);
+        $booking->update(['status' => 'checked_in']);
+
+        NotificationService::send($booking->host_id, 'Guest Checked In',
+            optional($booking->guest)->name . ' has checked in to ' . optional($booking->property)->title . ' · ' . now()->format('d M Y H:i'),
+            'system', '/dashboard/host-bookings');
+        NotificationService::send($booking->guest_id, 'Welcome! Check-in Confirmed',
+            'You have successfully checked in to ' . optional($booking->property)->title . '. Enjoy your stay!',
+            'system', '/dashboard/bookings');
+
+        return response()->json(['success' => true, 'message' => 'Checked in successfully']);
+    }
+
+    /**
+     * POST /bookings/{id}/checkout
+     */
+    public function checkOut(Request $request, $id)
+    {
+        $booking = Booking::findOrFail($id);
+        $booking->update(['status' => 'checked_out']);
+
+        NotificationService::send($booking->host_id, 'Guest Checked Out',
+            optional($booking->guest)->name . ' checked out of ' . optional($booking->property)->title . '. Please review their stay.',
+            'system', '/dashboard/host-bookings');
+        NotificationService::send($booking->guest_id, 'How was your stay?',
+            'Thank you for staying at ' . optional($booking->property)->title . '. Please leave a review!',
+            'system', '/bookings/' . $booking->id . '/review');
+
+        return response()->json(['success' => true, 'message' => 'Checked out successfully']);
     }
 }

@@ -67,10 +67,10 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $request->validate([
-            'name'     => 'required|string|max:255',
-            'email'    => 'required|email|unique:users',
+            'name'     => 'required|string|max:255|regex:/^[\pL\s\-]+$/u',
+            'email'    => 'required|email|max:255|unique:users,email',
             'password' => 'required|min:8|confirmed',
-            'role'     => 'required|in:admin,landlord,broker_licensed,broker_unlicensed,tenant,developer,valuer,surveyor,auctioneer,investor,corporate,property_manager,finance',
+            'role'     => 'required|in:landlord,tenant,broker_licensed,broker_unlicensed,developer,valuer,surveyor,auctioneer,investor,corporate,property_manager,finance',
         ]);
 
         $referralCode = $this->generateUniqueReferralCode();
@@ -136,6 +136,14 @@ class AuthController extends Controller
         ];
 
         return $map[$role] ?? '/dashboard/tenant';
+    }
+
+    private function logSecurityEvent(string $event, array $context = []): void
+    {
+        $log = date('Y-m-d H:i:s') . " [$event] IP:" . request()->ip()
+             . " UA:" . substr(request()->userAgent() ?? '', 0, 80)
+             . " " . json_encode($context) . "\n";
+        file_put_contents(storage_path('logs/security.log'), $log, FILE_APPEND);
     }
 
     private function generateUniqueReferralCode(): string
