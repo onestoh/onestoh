@@ -1,71 +1,75 @@
 #!/usr/bin/env bash
-# EstateYard — Local Setup Script
-# Usage: bash setup.sh
+# ============================================================
+#  EstateYard — Local Setup Script
+#  Usage: bash setup.sh
 #
-# NOTE: MySQL is now the default database engine.
-# A pre-built SQL dump is available at setup/estateyard_mysql.sql.
-# Import it into MySQL before running this script:
-#
-#   mysql -u root -p < setup/estateyard_mysql.sql
-#
-# Alternatively, if you prefer to run fresh migrations + seeders instead
-# of importing the SQL dump, run after setup completes:
-#
-#   php artisan migrate --seed
-#
-# SQLite fallback: set DB_CONNECTION=sqlite and DB_DATABASE=/absolute/path/to/database/estateyard.sqlite in .env
+#  Requirements: PHP 8.2+, Composer, MySQL 8.0+
+# ============================================================
 
 set -e
 
+GREEN='\033[0;32m'
+GOLD='\033[0;33m'
+NC='\033[0m'
+
 echo ""
-echo "======================================"
+echo -e "${GOLD}======================================"
 echo "  EstateYard — Local Setup"
-echo "======================================"
+echo -e "======================================${NC}"
 echo ""
 
-# 1. Install PHP dependencies
-echo "[1/5] Installing Composer dependencies..."
-composer install --no-interaction --prefer-dist
+# ── Step 1: Composer ──────────────────────────────────────────
+echo "[1/6] Installing PHP dependencies..."
+composer install --no-interaction --prefer-dist --optimize-autoloader
+echo -e "      ${GREEN}Done.${NC}"
 
-# 2. Copy .env
-echo "[2/5] Creating .env from example..."
+# ── Step 2: .env ──────────────────────────────────────────────
+echo "[2/6] Creating .env file..."
 cp .env.example .env
+echo -e "      ${GREEN}Done. Edit .env to set your DB credentials.${NC}"
 
-# 3. Generate app key
-echo "[3/5] Generating application key..."
-php artisan key:generate
+# ── Step 3: App key ───────────────────────────────────────────
+echo "[3/6] Generating application key..."
+php artisan key:generate --quiet
+echo -e "      ${GREEN}Done.${NC}"
 
-# 4. Database setup
-echo "[4/5] Setting up database..."
-if [ "${DB_CONNECTION:-mysql}" = "sqlite" ]; then
-  echo "      SQLite mode: copying pre-seeded database..."
-  cp setup/estateyard.sqlite database/estateyard.sqlite
-  DB_PATH="$(pwd)/database/estateyard.sqlite"
-  if [[ "$OSTYPE" == "darwin"* ]]; then
-    sed -i '' "s|DB_DATABASE=|DB_DATABASE=${DB_PATH}|" .env
-  else
-    sed -i "s|DB_DATABASE=|DB_DATABASE=${DB_PATH}|" .env
-  fi
-  echo "      DB_DATABASE => ${DB_PATH}"
-  echo "      Database ready (35 tables, 66 demo users, 50 properties)"
-else
-  echo "      MySQL mode: import the SQL dump manually if you haven't already:"
-  echo "        mysql -u root -p < setup/estateyard_mysql.sql"
-  echo "      Or run migrations + seeders after setup: php artisan migrate --seed"
-fi
+# ── Step 4: Database import ───────────────────────────────────
+echo "[4/6] Database setup..."
+echo ""
+echo "  Open .env and set your MySQL credentials:"
+echo "    DB_HOST=127.0.0.1"
+echo "    DB_DATABASE=estateyard"
+echo "    DB_USERNAME=root"
+echo "    DB_PASSWORD=your_password"
+echo ""
+echo "  Then import the database dump:"
+echo "    mysql -u root -p estateyard < setup/estateyard_mysql.sql"
+echo ""
+echo "  (Or run fresh migrations: php artisan migrate --seed)"
+echo ""
 
-# 5. Clear caches and start
-echo "[5/5] Clearing caches..."
-php artisan config:clear
-php artisan view:clear
+# ── Step 5: Storage link ──────────────────────────────────────
+echo "[5/6] Creating storage symlink..."
+php artisan storage:link --quiet 2>/dev/null || true
+echo -e "      ${GREEN}Done.${NC}"
+
+# ── Step 6: Clear caches ──────────────────────────────────────
+echo "[6/6] Clearing caches..."
+php artisan config:clear --quiet
+php artisan view:clear --quiet
+php artisan cache:clear --quiet
+echo -e "      ${GREEN}Done.${NC}"
 
 echo ""
-echo "======================================"
-echo "  READY! Starting server..."
+echo -e "${GOLD}======================================"
+echo "  Setup complete!"
 echo ""
-echo "  URL:  http://localhost:8000"
+echo "  Once DB is configured, start the server:"
+echo "    php artisan serve"
 echo ""
-echo "  Demo Login Credentials (password: password)"
+echo "  App URL: http://localhost:8000"
+echo ""
+echo "  Demo Accounts (password: password)"
 echo "  ─────────────────────────────────────────────"
 echo "  Admin:            admin1@estateyard.co.ke"
 echo "  Landlord:         landlord1@estateyard.co.ke"
@@ -79,7 +83,5 @@ echo "  Valuer:           valuer1@estateyard.co.ke"
 echo "  Surveyor:         surveyor1@estateyard.co.ke"
 echo "  Property Manager: property_manager1@estateyard.co.ke"
 echo "  Corporate:        corporate1@estateyard.co.ke"
-echo "  ─────────────────────────────────────────────"
-echo "======================================"
+echo -e "  ─────────────────────────────────────────────${NC}"
 echo ""
-php artisan serve
