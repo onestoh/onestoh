@@ -25,7 +25,7 @@ php artisan key:generate
 # 4. Copy pre-seeded SQLite database
 echo "[4/5] Setting up database..."
 cp setup/estateyard.sqlite database/estateyard.sqlite
-echo "      Database ready (34 tables, 66 demo users, 50 properties)"
+echo "      Database ready (35 tables, 66 demo users, 50 properties)"
 
 # Update DB path in .env to absolute path
 DB_PATH="$(pwd)/database/estateyard.sqlite"
