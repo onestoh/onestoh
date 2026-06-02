@@ -28,3 +28,10 @@ Thumbs.db
 
 # Export zips
 *.zip
+
+# SQLite databases (tracked via setup/ folder instead)
+database/*.sqlite
+database/estateyard.sqlite
+
+# Allow the bundled setup DB
+!setup/estateyard.sqlite
