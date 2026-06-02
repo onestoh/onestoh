@@ -12,10 +12,14 @@
   </div>
 
   @php
-    $steps = $onboardingSteps ?? [
-      ['title'=>'Complete Your Profile','desc'=>'Add your full name, phone number, and a profile photo.','done'=>false,'url'=>'/dashboard/profile','icon'=>'👤'],
-      ['title'=>'Verify Your Identity','desc'=>'Upload a government-issued ID to get your verified badge.','done'=>false,'url'=>'/verification','icon'=>'✅'],
-      ['title'=>'Add Your First Property','desc'=>'List a property for sale, rent, or short-stay.','done'=>false,'url'=>'/properties/create','icon'=>'🏠'],
+    $rawSteps = $onboardingSteps ?? ['profile'=>false,'verification'=>false,'activity'=>false];
+    $roleVal = session('role', 'tenant');
+    $activityLabel = in_array($roleVal, ['landlord','broker_licensed','broker_unlicensed','developer']) ? 'List a Property' : 'Find a Home or Start Activity';
+    $activityUrl   = in_array($roleVal, ['landlord','broker_licensed','broker_unlicensed','developer']) ? '/properties/create' : '/marketplace';
+    $steps = [
+      ['title'=>'Complete Your Profile','desc'=>'Add your phone number, bio, and personal details to your profile.','done'=>$rawSteps['profile'],'url'=>'/dashboard/profile','icon'=>'👤'],
+      ['title'=>'Get Verified','desc'=>'Submit your ID documents to get the verified badge and unlock full access.','done'=>$rawSteps['verification'],'url'=>'/dashboard/verification','icon'=>'✅'],
+      ['title'=>$activityLabel,'desc'=>'Take your first action on the platform to unlock all features.','done'=>$rawSteps['activity'],'url'=>$activityUrl,'icon'=>'🏠'],
     ];
     $completed = collect($steps)->where('done', true)->count();
     $pct = count($steps) > 0 ? round($completed / count($steps) * 100) : 0;

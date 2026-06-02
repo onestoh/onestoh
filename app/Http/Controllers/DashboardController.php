@@ -362,53 +362,32 @@ class DashboardController extends Controller
 
     public function analytics()
     {
-        $userId     = session('user_id');
-        $properties = Property::where('user_id', $userId)->get();
+        $userId      = session('user_id');
+        $properties  = Property::where('user_id', $userId)->with(['bookings', 'saves'])->get();
         $propertyIds = $properties->pluck('id');
 
-        // Monthly revenue (rent + bookings combined) last 6 months
+        // Rent revenue per month (last 6 months)
         $monthlyRevenue = [];
         for ($i = 5; $i >= 0; $i--) {
-            $month  = now()->subMonths($i);
-            $rent   = RentPayment::where('landlord_id', $userId)->where('status', 'paid')
+            $month = now()->subMonths($i);
+            $revenue = RentPayment::where('landlord_id', $userId)->where('status', 'paid')
                 ->whereYear('paid_at', $month->year)->whereMonth('paid_at', $month->month)->sum('amount');
-            $book   = Booking::whereIn('property_id', $propertyIds)->whereIn('status', ['confirmed','checked_out'])
+            $monthlyRevenue[] = ['month' => $month->format('M Y'), 'revenue' => $revenue];
+        }
+
+        // Booking revenue per month (last 6 months)
+        $bookingRevenue = [];
+        for ($i = 5; $i >= 0; $i--) {
+            $month = now()->subMonths($i);
+            $rev = Booking::whereIn('property_id', $propertyIds)->whereIn('status', ['confirmed','checked_out'])
                 ->whereYear('paid_at', $month->year)->whereMonth('paid_at', $month->month)->sum('total_price');
-            $monthlyRevenue[] = ['month' => $month->format('M y'), 'total' => $rent + $book];
+            $bookingRevenue[] = ['month' => $month->format('M Y'), 'revenue' => $rev];
         }
 
-        // Property performance table
-        $propertyPerformance = [];
-        foreach ($properties->take(10) as $prop) {
-            $bookings = Booking::where('property_id', $prop->id)->whereIn('status', ['confirmed','checked_out'])->get();
-            $propertyPerformance[] = [
-                'title'        => $prop->title,
-                'listing_type' => $prop->listing_type,
-                'bookings'     => $bookings->count(),
-                'revenue'      => $bookings->sum('total_price'),
-                'avg_nights'   => $bookings->avg('nights') ?? 0,
-                'status'       => $prop->status ?? 'available',
-            ];
-        }
-        usort($propertyPerformance, fn($a, $b) => $b['revenue'] <=> $a['revenue']);
+        $totalViews    = $properties->sum('view_count');
+        $totalSaves    = $properties->sum('save_count');
+        $totalBookings = Booking::whereIn('property_id', $propertyIds)->whereIn('status', ['confirmed','checked_out'])->count();
 
-        $totalRevenue   = collect($monthlyRevenue)->sum('total');
-        $bookings30d    = Booking::whereIn('property_id', $propertyIds)->where('created_at', '>=', now()->subDays(30))->count();
-        $activeListings = $properties->where('status', 'available')->count();
-        $totalBookings  = Booking::whereIn('property_id', $propertyIds)->whereIn('status', ['confirmed','checked_out'])->count();
-        $totalNights    = Booking::whereIn('property_id', $propertyIds)->whereIn('status', ['confirmed','checked_out'])->sum('nights');
-        $capacityNights = $properties->count() * 30;
-        $occupancyRate  = $capacityNights > 0 ? min(100, round($totalNights / $capacityNights * 100)) : 0;
-
-        $analytics = [
-            'monthly_revenue'      => $monthlyRevenue,
-            'property_performance' => $propertyPerformance,
-            'total_revenue'        => $totalRevenue,
-            'active_listings'      => $activeListings,
-            'bookings_30d'         => $bookings30d,
-            'occupancy_rate'       => $occupancyRate,
-        ];
-
-        return view('dashboard.shared.analytics', compact('analytics'));
+        return view('dashboard.shared.analytics', compact('properties', 'monthlyRevenue', 'bookingRevenue', 'totalViews', 'totalSaves', 'totalBookings'));
     }
 }
