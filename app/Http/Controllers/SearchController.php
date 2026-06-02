@@ -9,35 +9,36 @@ class SearchController extends Controller
 {
     public function index(Request $request)
     {
-        $query    = $request->input('q', '');
-        $type     = $request->input('type');
-        $county   = $request->input('county');
-        $minPrice = $request->input('min_price');
-        $maxPrice = $request->input('max_price');
-        $bedrooms = $request->input('bedrooms');
+        $query = Property::where('status', 'active');
 
-        $properties = Property::where('status', 'active')
-            ->when($query, function ($q) use ($query) {
-                $q->where(function ($inner) use ($query) {
-                    $inner->where('title', 'like', "%{$query}%")
-                          ->orWhere('location', 'like', "%{$query}%")
-                          ->orWhere('county', 'like', "%{$query}%")
-                          ->orWhere('description', 'like', "%{$query}%");
-                });
-            })
-            ->when($type, fn($q) => $q->where('property_type', $type))
-            ->when($county, fn($q) => $q->where('county', $county))
-            ->when($minPrice, fn($q) => $q->where('price', '>=', $minPrice))
-            ->when($maxPrice, fn($q) => $q->where('price', '<=', $maxPrice))
-            ->when($bedrooms, fn($q) => $q->where('bedrooms', $bedrooms))
-            ->with('owner:id,name,is_verified')
-            ->latest()
-            ->paginate(12)
-            ->withQueryString();
+        if ($request->q) {
+            $q = $request->q;
+            $query->where(fn($s) => $s->where('title','like',"%{$q}%")->orWhere('location','like',"%{$q}%")->orWhere('county','like',"%{$q}%")->orWhere('description','like',"%{$q}%"));
+        }
+        if ($request->type) $query->where('type', $request->type);
+        if ($request->listing_type) $query->whereIn('listing_type', (array)$request->listing_type);
+        if ($request->county) $query->where('county', $request->county);
+        if ($request->bedrooms) $query->where('bedrooms', '>=', $request->bedrooms);
+        if ($request->min_price) $query->where('price', '>=', $request->min_price);
+        if ($request->max_price) $query->where('price', '<=', $request->max_price);
+        if ($request->verified_only) $query->whereHas('owner', fn($u) => $u->where('is_verified', true));
+        if ($request->featured_only) $query->where('is_featured', true);
 
+        $sortMap = ['price_asc'=>'price', 'price_desc'=>'price', 'newest'=>'created_at', 'views'=>'view_count'];
+        $dirMap  = ['price_asc'=>'asc', 'price_desc'=>'desc', 'newest'=>'desc', 'views'=>'desc'];
+        $sort = $request->get('sort', 'newest');
+        $query->orderBy($sortMap[$sort] ?? 'created_at', $dirMap[$sort] ?? 'desc');
+
+        $properties = $query->with('owner')->paginate(12)->appends($request->query());
+
+        $searchQuery = $request->input('q', '');
         $counties = Property::where('status', 'active')->distinct()->pluck('county')->filter()->sort()->values();
 
-        return view('search.results', compact('properties', 'query', 'counties'));
+        return view('search.results', [
+            'properties' => $properties,
+            'query'      => $searchQuery,
+            'counties'   => $counties,
+        ]);
     }
 
     public function suggestions(Request $request)

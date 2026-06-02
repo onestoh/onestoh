@@ -143,7 +143,10 @@
               </div>
               <div class="property-card-footer">
                 <div><div class="property-card-price">{{ $p[7] }}</div><div class="property-card-price-label">Escrow protected</div></div>
-                <a href="{{ url('/marketplace/listing/'.($i+1)) }}" class="btn btn-gold btn-sm">View</a>
+                <div style="display:flex; gap:6px;">
+                  <button onclick="toggleCompare({{ $i+1 }}, '{{ addslashes($p[2]) }}')" class="btn btn-sm btn-outline" title="Compare" style="padding:6px 10px;">⚖️</button>
+                  <a href="{{ url('/marketplace/listing/'.($i+1)) }}" class="btn btn-gold btn-sm">View</a>
+                </div>
               </div>
             </div>
           </div>
@@ -172,6 +175,40 @@ function toggleFilter(btn) {
   btn.style.borderColor = active ? 'var(--border-dim)' : 'var(--gold)';
 }
 function setView(v) { console.log('View:', v); }
+
+// Property comparison
+const compareList = JSON.parse(localStorage.getItem('compareList') || '[]');
+let compareBar;
+
+function toggleCompare(id, title) {
+    const idx = compareList.indexOf(id);
+    if (idx > -1) {
+        compareList.splice(idx, 1);
+    } else if (compareList.length < 3) {
+        compareList.push(id);
+    } else {
+        if (typeof showToast === 'function') showToast('You can compare up to 3 properties at a time', 'gold');
+        else alert('You can compare up to 3 properties at a time');
+        return;
+    }
+    localStorage.setItem('compareList', JSON.stringify(compareList));
+    updateCompareBar();
+}
+
+function updateCompareBar() {
+    if (!compareBar) {
+        compareBar = document.createElement('div');
+        compareBar.id = 'compareBar';
+        compareBar.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--navy2);border:1px solid var(--gold);border-radius:12px;padding:12px 20px;z-index:999;display:flex;align-items:center;gap:16px;box-shadow:0 4px 20px rgba(201,168,76,0.3);';
+        document.body.appendChild(compareBar);
+    }
+    if (compareList.length === 0) { compareBar.style.display = 'none'; return; }
+    compareBar.style.display = 'flex';
+    compareBar.innerHTML = '<span style="color:var(--gold);font-size:13px;font-weight:600;">⚖️ ' + compareList.length + ' selected</span>' +
+        '<a href="/compare?ids=' + compareList.join(',') + '" class="btn btn-gold btn-sm">Compare Now</a>' +
+        '<button onclick="compareList.length=0;localStorage.setItem(\'compareList\',\'[]\');updateCompareBar();" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;">×</button>';
+}
+updateCompareBar();
 </script>
 @endpush
 @endsection

@@ -24,6 +24,8 @@ use App\Http\Controllers\PricingRuleController;
 use App\Http\Controllers\Admin\KycController;
 use App\Http\Controllers\Admin\PropertyModerationController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
+use App\Http\Controllers\AuctionLiveController;
+use App\Http\Controllers\EnquiryController;
 
 // PUBLIC ROUTES
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -151,6 +153,15 @@ Route::middleware(['auth.session'])->group(function () {
     });
 });
 
+// Auction live data (public polling)
+Route::get('/auctions/{id}/live-data', [AuctionLiveController::class, 'liveData']);
+
+// Property comparison (public)
+Route::get('/compare', [MarketplaceController::class, 'compare'])->name('compare');
+
+// Property enquiry (public)
+Route::post('/enquiry', [EnquiryController::class, 'send'])->name('enquiry.send');
+
 // Search suggestions (public, no auth)
 Route::get('/api/search/suggestions', [SearchController::class, 'suggestions'])->name('search.suggestions');
 
@@ -182,4 +193,20 @@ Route::middleware(['auth.session'])->group(function () {
     Route::get('/properties/{propertyId}/pricing', [PricingRuleController::class, 'index']);
     Route::post('/properties/{propertyId}/pricing', [PricingRuleController::class, 'store']);
     Route::delete('/properties/{propertyId}/pricing/{ruleId}', [PricingRuleController::class, 'destroy']);
+
+    // Auction live bidding & management (auth required)
+    Route::post('/auctions/{id}/live-bid', [AuctionLiveController::class, 'placeBid']);
+    Route::post('/auctions/{id}/end', [AuctionLiveController::class, 'endAuction'])->middleware('role:auctioneer,admin');
+
+    // Notifications unread count API
+    Route::get('/api/notifications/unread-count', function() {
+        $count = \App\Models\NotificationLog::where('user_id', session('user_id'))->where('is_read', false)->count();
+        return response()->json(['count' => $count]);
+    });
+
+    // Dashboard analytics
+    Route::get('/dashboard/analytics', [\App\Http\Controllers\DashboardController::class, 'analytics'])->name('dashboard.analytics');
+
+    // Dashboard onboarding
+    Route::get('/dashboard/onboarding', fn() => view('dashboard.shared.onboarding'))->name('dashboard.onboarding');
 });

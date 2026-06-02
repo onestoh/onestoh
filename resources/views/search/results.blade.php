@@ -62,14 +62,54 @@
                 style="width:100%; background:var(--navy3); border:1px solid var(--border-dim); border-radius:6px; padding:7px 10px; color:var(--white); font-size:13px; outline:none; box-sizing:border-box;">
             </div>
 
-            <div style="margin-bottom:20px;">
-              <label style="font-size:11px; color:var(--muted); display:block; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px;">Bedrooms</label>
-              <select name="bedrooms" style="width:100%; background:var(--navy3); border:1px solid var(--border-dim); border-radius:6px; padding:7px 10px; color:var(--white); font-size:13px; outline:none;">
-                <option value="">Any</option>
-                @foreach([1,2,3,4,5] as $b)
-                <option value="{{ $b }}" {{ request('bedrooms') == $b ? 'selected' : '' }}>{{ $b }}+ Beds</option>
-                @endforeach
+            <div style="margin-bottom:16px;">
+              <label style="font-size:11px; color:var(--muted); display:block; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px;">Sort By</label>
+              <select name="sort" style="width:100%; background:var(--navy3); border:1px solid var(--border-dim); border-radius:6px; padding:7px 10px; color:var(--white); font-size:13px; outline:none;">
+                <option value="newest" {{ request('sort') === 'newest' ? 'selected' : '' }}>Newest First</option>
+                <option value="price_asc" {{ request('sort') === 'price_asc' ? 'selected' : '' }}>Price: Low to High</option>
+                <option value="price_desc" {{ request('sort') === 'price_desc' ? 'selected' : '' }}>Price: High to Low</option>
+                <option value="views" {{ request('sort') === 'views' ? 'selected' : '' }}>Most Viewed</option>
               </select>
+            </div>
+
+            <div style="margin-bottom:16px;">
+              <label style="font-size:11px; color:var(--muted); display:block; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px;">Property Type</label>
+              @foreach(['house'=>'House','apartment'=>'Apartment','villa'=>'Villa','office'=>'Office','land'=>'Land','commercial'=>'Commercial'] as $val => $label)
+              <label style="display:flex; align-items:center; gap:8px; padding:4px 0; cursor:pointer; font-size:13px; color:var(--muted);">
+                <input type="checkbox" name="type[]" value="{{ $val }}" style="accent-color:var(--gold);" {{ in_array($val, (array)request('type')) ? 'checked' : '' }}> {{ $label }}
+              </label>
+              @endforeach
+            </div>
+
+            <div style="margin-bottom:16px;">
+              <label style="font-size:11px; color:var(--muted); display:block; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px;">Listing Type</label>
+              @foreach(['sale'=>'For Sale','rent'=>'For Rent','airbnb'=>'Airbnb','hotel'=>'Hotel','auction'=>'Auction'] as $val => $label)
+              <label style="display:flex; align-items:center; gap:8px; padding:4px 0; cursor:pointer; font-size:13px; color:var(--muted);">
+                <input type="checkbox" name="listing_type[]" value="{{ $val }}" style="accent-color:var(--gold);" {{ in_array($val, (array)request('listing_type')) ? 'checked' : '' }}> {{ $label }}
+              </label>
+              @endforeach
+            </div>
+
+            <div style="margin-bottom:16px;">
+              <label style="font-size:11px; color:var(--muted); display:block; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px;">Bedrooms</label>
+              <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                @foreach([''=>'Any','1'=>'1','2'=>'2','3'=>'3','4'=>'4','5'=>'5+'] as $val => $label)
+                <label style="cursor:pointer;">
+                  <input type="radio" name="bedrooms" value="{{ $val }}" style="display:none;" {{ request('bedrooms', '') === $val ? 'checked' : '' }}>
+                  <span style="display:block; padding:5px 12px; border-radius:6px; font-size:12px; background:{{ request('bedrooms', '') === $val ? 'var(--gold)' : 'var(--navy3)' }}; border:1px solid {{ request('bedrooms', '') === $val ? 'var(--gold)' : 'var(--border-dim)' }}; color:{{ request('bedrooms', '') === $val ? 'var(--navy)' : 'var(--muted)' }}; cursor:pointer;">{{ $label }}</span>
+                </label>
+                @endforeach
+              </div>
+            </div>
+
+            <div style="margin-bottom:16px;">
+              <label style="font-size:11px; color:var(--muted); display:block; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px;">Features</label>
+              <label style="display:flex; align-items:center; gap:8px; padding:4px 0; cursor:pointer; font-size:13px; color:var(--muted);">
+                <input type="checkbox" name="verified_only" value="1" style="accent-color:var(--gold);" {{ request('verified_only') ? 'checked' : '' }}> ✅ Verified Only
+              </label>
+              <label style="display:flex; align-items:center; gap:8px; padding:4px 0; cursor:pointer; font-size:13px; color:var(--muted);">
+                <input type="checkbox" name="featured_only" value="1" style="accent-color:var(--gold);" {{ request('featured_only') ? 'checked' : '' }}> ⭐ Featured Only
+              </label>
             </div>
 
             <button type="submit" class="btn btn-gold" style="width:100%;">Apply Filters</button>

@@ -66,9 +66,7 @@
         <!-- Notifications -->
         <div style="position:relative;">
           <button class="icon-btn" onclick="toggleNotifs()">🔔</button>
-          @if(($unreadNotifCount ?? 0) > 0)
-          <span style="position:absolute; top:-4px; right:-4px; background:var(--red); color:white; border-radius:50%; width:18px; height:18px; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:600;">{{ $unreadNotifCount > 9 ? '9+' : $unreadNotifCount }}</span>
-          @endif
+          <span id="notifBadge" style="position:absolute; top:-4px; right:-4px; background:var(--red); color:white; border-radius:50%; width:18px; height:18px; display:{{ ($unreadNotifCount ?? 0) > 0 ? 'flex' : 'none' }}; align-items:center; justify-content:center; font-size:10px; font-weight:600;">{{ ($unreadNotifCount ?? 0) > 9 ? '9+' : ($unreadNotifCount ?? 0) }}</span>
 
           <!-- Notification Dropdown -->
           <div id="notifDropdown" style="display:none; position:absolute; right:0; top:50px; width:340px; background:var(--navy2); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); z-index:300;">
@@ -129,6 +127,20 @@
         </div>
       </div>
     </header>
+
+    <!-- ONBOARDING BANNER -->
+    @if(!($onboardingComplete ?? true))
+    <div style="background:linear-gradient(135deg,var(--gold-dim),rgba(74,159,224,0.1));border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span style="font-size:20px;">🚀</span>
+        <div>
+          <div style="font-size:13px;font-weight:600;color:var(--white);">Complete your profile to unlock all features</div>
+          <div style="font-size:12px;color:var(--muted);">{{ array_sum($onboardingSteps ?? []) }}/3 steps completed</div>
+        </div>
+      </div>
+      <a href="/dashboard/onboarding" class="btn btn-gold btn-sm">Complete Setup →</a>
+    </div>
+    @endif
 
     <!-- PAGE CONTENT -->
     <main class="dash-content">
@@ -199,6 +211,34 @@
   if (window.innerWidth <= 1024) {
     document.getElementById('sidebarToggle').style.display = 'flex';
   }
+
+  // Poll for new notifications every 30 seconds
+  let lastNotifCount = parseInt('{{ $unreadNotifCount ?? 0 }}');
+
+  function pollNotifications() {
+    fetch('/api/notifications/unread-count', {
+      headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]')?.content || '' }
+    })
+    .then(r => r.json())
+    .then(data => {
+      const badge = document.getElementById('notifBadge');
+      if (badge) {
+        badge.textContent = data.count > 9 ? '9+' : data.count;
+        badge.style.display = data.count > 0 ? 'flex' : 'none';
+      }
+      if (data.count > lastNotifCount) {
+        const btn = document.querySelector('[onclick="toggleNotifs()"]');
+        if (btn) {
+          btn.style.transform = 'scale(1.3)';
+          setTimeout(() => btn.style.transform = '', 400);
+        }
+      }
+      lastNotifCount = data.count;
+    })
+    .catch(() => {});
+  }
+
+  setInterval(pollNotifications, 30000);
 
   // Close dropdowns on outside click
   document.addEventListener('click', (e) => {

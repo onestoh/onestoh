@@ -51,6 +51,14 @@ class MarketplaceController extends Controller
         return view('marketplace.index', compact('properties', 'counties'));
     }
 
+    public function compare(Request $request)
+    {
+        $ids = array_slice(explode(',', $request->get('ids', '')), 0, 3);
+        $ids = array_filter($ids, 'is_numeric');
+        $properties = \App\Models\Property::whereIn('id', $ids)->get();
+        return view('marketplace.compare', compact('properties'));
+    }
+
     public function show($id)
     {
         $property = Property::with(['owner', 'documents', 'inspections'])->findOrFail($id);
