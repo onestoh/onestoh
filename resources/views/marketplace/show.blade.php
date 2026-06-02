@@ -210,30 +210,42 @@
           <p style="text-align:center; font-size:12px; color:var(--muted); margin-top:12px;">You won't be charged yet</p>
         </div>
         @else
-        <!-- INSPECTION FORM for sale/rent -->
+        <!-- INSPECTION + ENQUIRY FORM for sale/rent -->
         <div style="background:var(--navy2); border:1px solid var(--border); border-radius:var(--radius); padding:24px; margin-bottom:16px;">
-          <h3 style="font-size:16px; font-weight:600; color:var(--white); margin-bottom:16px;">📅 Book an Inspection</h3>
-          @if(session('user_id'))
-          <form method="POST" action="{{ url('/inspections') }}">
+          <h3 style="font-size:16px; font-weight:600; color:var(--white); margin-bottom:16px;">📩 Send an Enquiry</h3>
+          <form id="enquiryForm">
             @csrf
             <input type="hidden" name="property_id" value="{{ $property->id }}">
             <div class="form-group">
-              <label class="form-label">Preferred Date</label>
-              <input type="date" name="scheduled_at" class="form-control" min="{{ date('Y-m-d', strtotime('+1 day')) }}" required>
+              <label class="form-label">Your Name</label>
+              <input type="text" name="name" id="enquiryName" class="form-control" value="{{ session('user_name', '') }}" placeholder="Full name" required>
             </div>
             <div class="form-group">
-              <label class="form-label">Notes <span style="color:var(--muted); font-size:12px;">(optional)</span></label>
-              <textarea name="notes" class="form-control" rows="2" placeholder="Anything specific you'd like to check..."></textarea>
+              <label class="form-label">Email</label>
+              <input type="email" name="email" id="enquiryEmail" class="form-control" placeholder="your@email.com" required>
             </div>
-            <button type="submit" class="btn btn-gold" style="width:100%; justify-content:center; margin-bottom:10px;">📅 Request Inspection</button>
+            <div class="form-group">
+              <label class="form-label">Phone <span style="color:var(--muted); font-size:12px;">(optional)</span></label>
+              <input type="tel" name="phone" class="form-control" placeholder="+254 700 000 000">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Message</label>
+              <textarea name="message" class="form-control" rows="3" placeholder="I'm interested in this property and would like more details..." required></textarea>
+            </div>
+            <div id="enquiryMsg" style="display:none; padding:10px 14px; border-radius:8px; margin-bottom:12px; font-size:13px;"></div>
+            <button type="submit" id="enquiryBtn" class="btn btn-gold" style="width:100%; justify-content:center; margin-bottom:10px;">📩 Send Enquiry</button>
           </form>
-          @else
-          <div style="text-align:center; padding:16px 0;">
-            <p style="color:var(--muted); font-size:14px; margin-bottom:16px;">Login to book an inspection for this property</p>
-            <a href="{{ url('/login') }}" class="btn btn-gold" style="width:100%; justify-content:center;">Login to Book</a>
-          </div>
+          @if(session('user_id'))
+          <form method="POST" action="{{ url('/inspections') }}" style="margin-top:12px; padding-top:12px; border-top:1px solid var(--border-dim);">
+            @csrf
+            <input type="hidden" name="property_id" value="{{ $property->id }}">
+            <div class="form-group">
+              <label class="form-label" style="font-size:14px;">📅 Or Book an Inspection</label>
+              <input type="date" name="scheduled_at" class="form-control" min="{{ date('Y-m-d', strtotime('+1 day')) }}" required>
+            </div>
+            <button type="submit" class="btn btn-outline" style="width:100%; justify-content:center;">Request Inspection</button>
+          </form>
           @endif
-          <button type="button" class="btn btn-outline" style="width:100%; justify-content:center;">💬 Message Agent</button>
         </div>
         @endif
 
@@ -288,6 +300,58 @@
 @endsection
 
 @push('scripts')
+<script>
+// Enquiry form submission
+const enquiryForm = document.getElementById('enquiryForm');
+if (enquiryForm) {
+    enquiryForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const btn = document.getElementById('enquiryBtn');
+        const msgEl = document.getElementById('enquiryMsg');
+        const origText = btn.textContent;
+        btn.textContent = 'Sending...';
+        btn.disabled = true;
+
+        const formData = new FormData(enquiryForm);
+        const data = Object.fromEntries(formData.entries());
+
+        fetch('/enquiry', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify(data)
+        })
+        .then(r => r.json())
+        .then(res => {
+            if (res.success) {
+                msgEl.style.display = 'block';
+                msgEl.style.background = 'rgba(46,204,138,0.1)';
+                msgEl.style.border = '1px solid rgba(46,204,138,0.3)';
+                msgEl.style.color = '#2ECC8A';
+                msgEl.textContent = '✅ ' + res.message;
+                enquiryForm.reset();
+                btn.textContent = '✅ Sent!';
+                btn.style.background = 'var(--green)';
+            } else {
+                msgEl.style.display = 'block';
+                msgEl.style.background = 'rgba(224,82,82,0.1)';
+                msgEl.style.border = '1px solid rgba(224,82,82,0.3)';
+                msgEl.style.color = 'var(--red)';
+                msgEl.textContent = '❌ ' + (res.message || 'Something went wrong');
+                btn.textContent = origText;
+                btn.disabled = false;
+            }
+        })
+        .catch(() => {
+            btn.textContent = origText;
+            btn.disabled = false;
+        });
+    });
+}
+</script>
 @if(in_array($property->listing_type ?? 'sale', ['airbnb', 'hotel']))
 <script>
 const PROP_ID = {{ $property->id }};

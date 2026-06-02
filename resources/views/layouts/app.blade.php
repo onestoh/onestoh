@@ -45,18 +45,25 @@
 
     <!-- Mobile Nav -->
     <div class="mobile-nav" id="mobileNav" style="display:none; background:var(--navy2); border-top:1px solid var(--border); padding:16px 20px;">
+      <!-- Mobile Search -->
+      <form method="GET" action="{{ url('/search') }}" style="margin-bottom:16px;">
+        <input type="text" name="q" placeholder="Search properties..." style="width:100%; background:var(--navy3); border:1px solid var(--border-dim); border-radius:8px; padding:10px 16px; color:var(--white); font-size:14px; outline:none; box-sizing:border-box;">
+      </form>
       <ul style="list-style:none; display:flex; flex-direction:column; gap:4px;">
-        <li><a href="{{ url('/marketplace') }}" style="display:block; padding:10px 14px; color:var(--muted); border-radius:8px;" onmouseover="this.style.background='var(--gold-dim)'" onmouseout="this.style.background='transparent'">Marketplace</a></li>
-        <li><a href="{{ url('/marketplace?type=houses') }}" style="display:block; padding:10px 14px; color:var(--muted); border-radius:8px;">Buy</a></li>
-        <li><a href="{{ url('/marketplace?type=rent') }}" style="display:block; padding:10px 14px; color:var(--muted); border-radius:8px;">Rent</a></li>
-        <li><a href="{{ url('/marketplace?type=airbnb') }}" style="display:block; padding:10px 14px; color:var(--muted); border-radius:8px;">Short Stay</a></li>
-        <li><a href="{{ url('/marketplace?type=hotels') }}" style="display:block; padding:10px 14px; color:var(--muted); border-radius:8px;">Hotels</a></li>
-        <li><a href="{{ url('/marketplace?type=land') }}" style="display:block; padding:10px 14px; color:var(--muted); border-radius:8px;">Land</a></li>
-        <li><a href="{{ url('/auctions') }}" style="display:block; padding:10px 14px; color:var(--muted); border-radius:8px;">Auctions</a></li>
+        <li><a href="{{ url('/marketplace') }}" style="display:block; padding:10px 14px; color:var(--muted); border-radius:8px;">🏠 Marketplace</a></li>
+        <li><a href="{{ url('/marketplace?type=houses') }}" style="display:block; padding:10px 14px; color:var(--muted); border-radius:8px;">🏡 Buy a Home</a></li>
+        <li><a href="{{ url('/marketplace?type=rent') }}" style="display:block; padding:10px 14px; color:var(--muted); border-radius:8px;">🏘️ Rent a Home</a></li>
+        <li><a href="{{ url('/marketplace?type=airbnb') }}" style="display:block; padding:10px 14px; color:var(--muted); border-radius:8px;">✈️ Short Stay / Airbnb</a></li>
+        <li><a href="{{ url('/marketplace?type=hotels') }}" style="display:block; padding:10px 14px; color:var(--muted); border-radius:8px;">🏨 Hotels</a></li>
+        <li><a href="{{ url('/marketplace?type=land') }}" style="display:block; padding:10px 14px; color:var(--muted); border-radius:8px;">🌿 Buy Land</a></li>
+        <li><a href="{{ url('/commercial') }}" style="display:block; padding:10px 14px; color:var(--muted); border-radius:8px;">🏢 Commercial</a></li>
+        <li><a href="{{ url('/auctions') }}" style="display:block; padding:10px 14px; color:var(--muted); border-radius:8px;">🔨 Auctions</a></li>
+        <li><a href="{{ url('/financing') }}" style="display:block; padding:10px 14px; color:var(--muted); border-radius:8px;">💰 Property Finance</a></li>
+        <li><a href="{{ url('/about') }}" style="display:block; padding:10px 14px; color:var(--muted); border-radius:8px;">ℹ️ About Us</a></li>
       </ul>
       <div style="display:flex; gap:10px; margin-top:16px; padding-top:16px; border-top:1px solid var(--border);">
-        <a href="{{ url('/login') }}" class="btn btn-outline btn-sm" style="flex:1; justify-content:center;">Sign In</a>
-        <a href="{{ url('/register') }}" class="btn btn-gold btn-sm" style="flex:1; justify-content:center;">Join Free</a>
+        <a href="{{ url('/login') }}" class="btn btn-outline" style="flex:1; justify-content:center; padding:12px;">Sign In</a>
+        <a href="{{ url('/register') }}" class="btn btn-gold" style="flex:1; justify-content:center; padding:12px;">Join Free</a>
       </div>
     </div>
   </nav>
@@ -67,6 +74,17 @@
   <!-- FOOTER -->
   <footer class="footer">
     <div class="container">
+      <!-- Newsletter Signup -->
+      <div style="background:var(--navy3);border-radius:var(--radius);padding:40px;margin-bottom:48px;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;">
+        <div>
+          <div style="font-family:var(--font-serif);font-size:24px;color:var(--white);margin-bottom:6px;">Stay ahead of the market</div>
+          <div style="font-size:14px;color:var(--muted);">Weekly property deals, market insights and investment tips — delivered free.</div>
+        </div>
+        <form style="display:flex;gap:10px;flex-wrap:wrap;" onsubmit="subscribeNewsletter(event)">
+          <input type="email" placeholder="your@email.com" style="background:var(--navy2);border:1px solid var(--border);border-radius:8px;padding:12px 18px;color:var(--text);font-size:14px;outline:none;min-width:240px;" required>
+          <button type="submit" class="btn btn-gold">Subscribe Free</button>
+        </form>
+      </div>
       <div class="footer-grid">
         <div>
           <div class="footer-brand">Estate<span>Yard</span></div>
@@ -155,6 +173,28 @@
     function toggleMobileNav() {
       const nav = document.getElementById('mobileNav');
       nav.style.display = nav.style.display === 'none' ? 'block' : 'none';
+    }
+
+    // Close mobile nav on outside click
+    document.addEventListener('click', function(e) {
+      const nav = document.getElementById('mobileNav');
+      const navbar = document.getElementById('navbar');
+      if (nav && nav.style.display !== 'none' && !navbar.contains(e.target)) {
+        nav.style.display = 'none';
+      }
+    });
+
+    // Newsletter subscription
+    function subscribeNewsletter(e) {
+      e.preventDefault();
+      const email = e.target.querySelector('input').value;
+      // Show toast if available, else alert
+      if (typeof showToast === 'function') {
+        showToast('Subscribed! Watch your inbox for market updates.', 'green');
+      } else {
+        alert('Subscribed! Watch your inbox for market updates.');
+      }
+      e.target.reset();
     }
 
     // Navbar scroll effect
