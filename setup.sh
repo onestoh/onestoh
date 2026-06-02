@@ -1,6 +1,19 @@
 #!/usr/bin/env bash
 # EstateYard — Local Setup Script
 # Usage: bash setup.sh
+#
+# NOTE: MySQL is now the default database engine.
+# A pre-built SQL dump is available at setup/estateyard_mysql.sql.
+# Import it into MySQL before running this script:
+#
+#   mysql -u root -p < setup/estateyard_mysql.sql
+#
+# Alternatively, if you prefer to run fresh migrations + seeders instead
+# of importing the SQL dump, run after setup completes:
+#
+#   php artisan migrate --seed
+#
+# SQLite fallback: set DB_CONNECTION=sqlite and DB_DATABASE=/absolute/path/to/database/estateyard.sqlite in .env
 
 set -e
 
@@ -22,19 +35,24 @@ cp .env.example .env
 echo "[3/5] Generating application key..."
 php artisan key:generate
 
-# 4. Copy pre-seeded SQLite database
+# 4. Database setup
 echo "[4/5] Setting up database..."
-cp setup/estateyard.sqlite database/estateyard.sqlite
-echo "      Database ready (35 tables, 66 demo users, 50 properties)"
-
-# Update DB path in .env to absolute path
-DB_PATH="$(pwd)/database/estateyard.sqlite"
-if [[ "$OSTYPE" == "darwin"* ]]; then
-  sed -i '' "s|DB_DATABASE=|DB_DATABASE=${DB_PATH}|" .env
+if [ "${DB_CONNECTION:-mysql}" = "sqlite" ]; then
+  echo "      SQLite mode: copying pre-seeded database..."
+  cp setup/estateyard.sqlite database/estateyard.sqlite
+  DB_PATH="$(pwd)/database/estateyard.sqlite"
+  if [[ "$OSTYPE" == "darwin"* ]]; then
+    sed -i '' "s|DB_DATABASE=|DB_DATABASE=${DB_PATH}|" .env
+  else
+    sed -i "s|DB_DATABASE=|DB_DATABASE=${DB_PATH}|" .env
+  fi
+  echo "      DB_DATABASE => ${DB_PATH}"
+  echo "      Database ready (35 tables, 66 demo users, 50 properties)"
 else
-  sed -i "s|DB_DATABASE=|DB_DATABASE=${DB_PATH}|" .env
+  echo "      MySQL mode: import the SQL dump manually if you haven't already:"
+  echo "        mysql -u root -p < setup/estateyard_mysql.sql"
+  echo "      Or run migrations + seeders after setup: php artisan migrate --seed"
 fi
-echo "      DB_DATABASE => ${DB_PATH}"
 
 # 5. Clear caches and start
 echo "[5/5] Clearing caches..."
