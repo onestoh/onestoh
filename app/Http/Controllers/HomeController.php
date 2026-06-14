@@ -11,16 +11,25 @@ class HomeController extends Controller
 {
     public function index()
     {
-        $categories = AssetCategory::where('is_active', true)->orderBy('sort_order')->get();
-        $featuredListings = Listing::active()->featured()->with(['photos','yard','category'])->limit(8)->get();
-        $latestListings = Listing::active()->with(['photos','yard','category'])->latest()->limit(12)->get();
+        $categories = AssetCategory::withCount('listings')->orderBy('name')->take(6)->get();
+
+        $featuredListings = collect();
+        try {
+            $featuredListings = Listing::where('status', 'active')
+                ->where('is_featured', true)
+                ->with(['photos', 'category', 'user'])
+                ->take(6)
+                ->get();
+        } catch (\Exception $e) {
+            // Table may not have is_featured column yet
+        }
 
         $stats = [
-            'total_listings' => Listing::active()->count(),
+            'total_listings' => Listing::where('status', 'active')->count(),
             'total_yards' => User::where('role', 'yard_owner')->where('status', 'verified')->count(),
             'total_bookings' => Booking::where('status', 'completed')->count(),
         ];
 
-        return view('home', compact('categories', 'featuredListings', 'latestListings', 'stats'));
+        return view('welcome', compact('categories', 'featuredListings', 'stats'));
     }
 }

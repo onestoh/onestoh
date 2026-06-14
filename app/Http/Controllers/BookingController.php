@@ -9,6 +9,9 @@ use App\Models\PlatformSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\BookingConfirmed;
+use App\Mail\BookingCancelled;
 
 class BookingController extends Controller
 {
@@ -157,6 +160,16 @@ class BookingController extends Controller
             $payment->update(['status' => 'completed', 'mpesa_receipt' => $receiptNo]);
             $payment->booking->update(['status' => 'confirmed']);
 
+            // Send booking confirmed email
+            try {
+                $confirmedBooking = $payment->booking->fresh(['listing', 'client']);
+                if ($confirmedBooking?->client?->email) {
+                    Mail::to($confirmedBooking->client)->queue(new BookingConfirmed($confirmedBooking));
+                }
+            } catch (\Exception $e) {
+                Log::error('BookingConfirmed email error: ' . $e->getMessage());
+            }
+
             // Credit owner wallet minus platform fee
             $listing = $payment->booking->listing;
             if ($listing?->user) {
@@ -250,6 +263,17 @@ class BookingController extends Controller
         abort_unless(in_array($booking->status, ['pending_payment', 'confirmed']), 403);
 
         $booking->update(['status' => 'cancelled']);
+
+        // Send booking cancelled email
+        try {
+            $booking->load(['listing', 'client']);
+            if ($booking->client?->email) {
+                Mail::to($booking->client)->queue(new BookingCancelled($booking));
+            }
+        } catch (\Exception $e) {
+            Log::error('BookingCancelled email error: ' . $e->getMessage());
+        }
+
         return back()->with('success', 'Booking cancelled.');
     }
 }

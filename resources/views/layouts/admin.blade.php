@@ -65,30 +65,26 @@
         </div>
         
         <div class="section-label">Overview</div>
-        <a href="#" class="admin-link active"><i class="fas fa-tachometer-alt"></i>Dashboard</a>
-        <a href="#" class="admin-link"><i class="fas fa-chart-bar"></i>Analytics</a>
-        
+        <a href="{{ route('admin.dashboard') }}" class="admin-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}"><i class="fas fa-tachometer-alt"></i>Dashboard</a>
+
         <div class="section-label">Management</div>
-        <a href="#" class="admin-link"><i class="fas fa-users"></i>Users</a>
-        <a href="#" class="admin-link"><i class="fas fa-warehouse"></i>Yards</a>
-        <a href="#" class="admin-link"><i class="fas fa-car"></i>Listings</a>
-        <a href="#" class="admin-link"><i class="fas fa-id-card"></i>KYC Reviews</a>
-        
+        <a href="{{ route('admin.users.index') }}" class="admin-link {{ request()->routeIs('admin.users*') ? 'active' : '' }}"><i class="fas fa-users"></i>Users</a>
+        <a href="{{ route('admin.yards.index') }}" class="admin-link {{ request()->routeIs('admin.yards*') ? 'active' : '' }}"><i class="fas fa-warehouse"></i>Yards</a>
+        <a href="{{ route('admin.listings.index') }}" class="admin-link {{ request()->routeIs('admin.listings*') ? 'active' : '' }}"><i class="fas fa-car"></i>Listings</a>
+        <a href="{{ route('admin.kyc.index') }}" class="admin-link {{ request()->routeIs('admin.kyc*') ? 'active' : '' }}"><i class="fas fa-id-card"></i>KYC Reviews</a>
+        <a href="{{ route('admin.categories.index') }}" class="admin-link {{ request()->routeIs('admin.categories*') ? 'active' : '' }}"><i class="fas fa-tags"></i>Categories</a>
+
         <div class="section-label">Transactions</div>
-        <a href="#" class="admin-link"><i class="fas fa-calendar-check"></i>Bookings</a>
-        <a href="#" class="admin-link"><i class="fas fa-credit-card"></i>Payments</a>
-        <a href="#" class="admin-link"><i class="fas fa-money-bill-wave"></i>Payouts</a>
-        <a href="#" class="admin-link"><i class="fas fa-percent"></i>Commissions</a>
-        
+        <a href="{{ route('admin.bookings.index') }}" class="admin-link {{ request()->routeIs('admin.bookings*') ? 'active' : '' }}"><i class="fas fa-calendar-check"></i>Bookings</a>
+        <a href="{{ route('admin.payments.index') }}" class="admin-link {{ request()->routeIs('admin.payments*') ? 'active' : '' }}"><i class="fas fa-credit-card"></i>Payments</a>
+        <a href="{{ route('admin.payouts.index') }}" class="admin-link {{ request()->routeIs('admin.payouts*') ? 'active' : '' }}"><i class="fas fa-money-bill-wave"></i>Payouts</a>
+        <a href="{{ route('admin.commissions.index') }}" class="admin-link {{ request()->routeIs('admin.commissions*') ? 'active' : '' }}"><i class="fas fa-percent"></i>Commissions</a>
+
         <div class="section-label">Support</div>
-        <a href="#" class="admin-link"><i class="fas fa-exclamation-triangle"></i>Disputes</a>
-        <a href="#" class="admin-link"><i class="fas fa-star"></i>Reviews</a>
-        <a href="#" class="admin-link"><i class="fas fa-comments"></i>Messages</a>
-        
+        <a href="{{ route('admin.disputes.index') }}" class="admin-link {{ request()->routeIs('admin.disputes*') ? 'active' : '' }}"><i class="fas fa-exclamation-triangle"></i>Disputes</a>
+
         <div class="section-label">System</div>
-        <a href="#" class="admin-link"><i class="fas fa-cog"></i>Settings</a>
-        <a href="#" class="admin-link"><i class="fas fa-tags"></i>Categories</a>
-        <a href="#" class="admin-link"><i class="fas fa-bell"></i>Notifications</a>
+        <a href="{{ route('admin.settings.index') }}" class="admin-link {{ request()->routeIs('admin.settings*') ? 'active' : '' }}"><i class="fas fa-cog"></i>Settings</a>
         <form method="POST" action="{{ route('logout') }}" class="mt-2">
             @csrf
             <button type="submit" class="admin-link w-100 border-0 text-start" style="background:none;">

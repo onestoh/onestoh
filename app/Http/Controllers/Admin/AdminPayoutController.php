@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\PayoutRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\PayoutApproved;
 
 class AdminPayoutController extends Controller
 {
@@ -18,6 +20,16 @@ class AdminPayoutController extends Controller
     {
         abort_unless($payout->status === 'pending', 403);
         $payout->update(['status' => 'approved', 'processed_at' => now()]);
+
+        // Send payout approved email
+        try {
+            if ($payout->user?->email) {
+                Mail::to($payout->user)->queue(new PayoutApproved($payout));
+            }
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('PayoutApproved email error: ' . $e->getMessage());
+        }
+
         return back()->with('success', 'Payout approved. Transfer KES ' . number_format($payout->amount) . ' to ' . $payout->mpesa_number);
     }
 
