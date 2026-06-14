@@ -6,7 +6,6 @@
     <title>TheOnlineYard — Kenya's Premier Vehicle & Machinery Rental Platform</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
         :root {
             --black: #080C12;
@@ -19,362 +18,577 @@
             --danger: #E84040;
         }
         * { box-sizing: border-box; }
-        body { background: var(--black); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; }
-        a { text-decoration: none; }
+        body {
+            background: var(--black);
+            color: var(--text);
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+        }
 
-        /* Navbar */
-        .navbar-brand { color: var(--amber) !important; font-weight: 800; font-size: 1.3rem; letter-spacing: -.5px; }
-        .nav-link-custom { color: var(--muted); font-size: .9rem; font-weight: 500; padding: .5rem .9rem; border-radius: 6px; transition: color .2s; }
-        .nav-link-custom:hover { color: var(--text); }
-        .btn-amber { background: var(--amber); color: #000; font-weight: 700; border: none; padding: .55rem 1.4rem; border-radius: 8px; }
-        .btn-amber:hover { background: #d4821f; color: #000; }
-        .btn-outline-amber { border: 2px solid var(--amber); color: var(--amber); background: transparent; font-weight: 700; padding: .55rem 1.4rem; border-radius: 8px; }
+        /* ---- Navbar ---- */
+        .navbar-custom {
+            background: rgba(8,12,18,.96);
+            border-bottom: 1px solid var(--border);
+            backdrop-filter: blur(10px);
+            padding: .75rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        .navbar-brand-name {
+            font-weight: 800;
+            font-size: 1.3rem;
+            color: var(--amber) !important;
+            text-decoration: none;
+        }
+        .nav-lnk {
+            color: var(--muted);
+            font-size: .875rem;
+            font-weight: 500;
+            text-decoration: none;
+            transition: color .2s;
+        }
+        .nav-lnk:hover { color: var(--text); }
+        .btn-amber {
+            background: var(--amber);
+            color: #000;
+            font-weight: 700;
+            border: none;
+            transition: opacity .2s;
+        }
+        .btn-amber:hover { opacity: .9; color: #000; }
+        .btn-outline-amber {
+            border: 1.5px solid var(--amber);
+            color: var(--amber);
+            background: transparent;
+            font-weight: 600;
+            transition: all .2s;
+        }
         .btn-outline-amber:hover { background: var(--amber); color: #000; }
-        .top-navbar { background: rgba(8,12,18,.95); border-bottom: 1px solid var(--border); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 1000; }
 
-        /* Hero */
+        /* ---- Hero ---- */
         .hero-section {
-            background: linear-gradient(135deg, #080C12 0%, #0f1a28 40%, #1a1000 100%);
-            padding: 7rem 0 5rem;
+            min-height: 88vh;
+            background: linear-gradient(135deg, var(--black) 0%, #0d1520 50%, #0a1118 100%);
+            display: flex;
+            align-items: center;
             position: relative;
             overflow: hidden;
+            padding: 80px 0 60px;
         }
         .hero-section::before {
             content: '';
-            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-            background: radial-gradient(ellipse at 60% 50%, rgba(232,146,42,.08) 0%, transparent 70%);
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(232,146,42,.08) 0%, transparent 70%);
+            pointer-events: none;
         }
-        .hero-title { font-size: clamp(2rem, 5vw, 3.2rem); font-weight: 800; line-height: 1.15; }
-        .hero-subtitle { color: var(--muted); font-size: 1.15rem; max-width: 600px; margin: 0 auto; }
-        .amber-text { color: var(--amber); }
-        .hero-badge { background: rgba(232,146,42,.12); border: 1px solid rgba(232,146,42,.3); color: var(--amber); font-size: .78rem; font-weight: 700; padding: .3rem .9rem; border-radius: 20px; letter-spacing: .5px; text-transform: uppercase; display: inline-block; margin-bottom: 1.5rem; }
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: .5rem;
+            background: rgba(232,146,42,.1);
+            border: 1px solid rgba(232,146,42,.25);
+            color: var(--amber);
+            border-radius: 20px;
+            padding: .3rem .9rem;
+            font-size: .78rem;
+            font-weight: 700;
+            letter-spacing: .5px;
+            text-transform: uppercase;
+            margin-bottom: 1.25rem;
+        }
+        .hero-title {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 800;
+            line-height: 1.1;
+            color: var(--text);
+            margin-bottom: 1.25rem;
+        }
+        .hero-title span { color: var(--amber); }
+        .hero-subtitle {
+            font-size: 1.1rem;
+            color: var(--muted);
+            line-height: 1.7;
+            max-width: 550px;
+            margin-bottom: 2.5rem;
+        }
+        .hero-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: .75rem;
+            height: 420px;
+        }
+        .hero-grid-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: .5rem;
+            color: var(--muted);
+            font-size: .85rem;
+        }
+        .hero-grid-card i { font-size: 2.5rem; color: var(--amber); opacity: .6; }
+        .hero-grid-card:first-child { grid-row: span 2; }
 
-        /* Stats bar */
-        .stats-bar { background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 1.5rem 0; }
-        .stat-item .value { font-size: 1.8rem; font-weight: 800; color: var(--amber); display: block; }
-        .stat-item .label { font-size: .82rem; color: var(--muted); }
+        /* ---- Stats ---- */
+        .stats-bar {
+            background: var(--surface);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            padding: 1.5rem 0;
+        }
+        .stat-number { font-size: 1.8rem; font-weight: 800; color: var(--amber); display: block; line-height: 1; }
+        .stat-label { font-size: .8rem; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-top: .3rem; }
 
-        /* Section titles */
-        .section-title { font-size: 2rem; font-weight: 800; margin-bottom: .5rem; }
-        .section-sub { color: var(--muted); margin-bottom: 2.5rem; }
+        /* ---- Sections ---- */
+        .section-eyebrow { font-size: .75rem; text-transform: uppercase; letter-spacing: 2px; color: var(--amber); font-weight: 700; margin-bottom: .5rem; }
+        .section-title { font-size: clamp(1.5rem, 3vw, 2.2rem); font-weight: 800; color: var(--text); }
+        .section-subtitle { color: var(--muted); font-size: 1rem; margin-top: .5rem; }
 
-        /* Category cards */
-        .cat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.8rem 1.2rem; text-align: center; transition: border-color .2s, transform .2s; display: block; color: var(--text); }
-        .cat-card:hover { border-color: var(--amber); transform: translateY(-2px); color: var(--text); }
-        .cat-card .cat-icon { font-size: 2rem; color: var(--amber); margin-bottom: 1rem; }
-        .cat-card .cat-name { font-weight: 700; font-size: 1rem; margin-bottom: .25rem; }
-        .cat-card .cat-count { font-size: .8rem; color: var(--muted); }
+        /* ---- Category Cards ---- */
+        .category-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.75rem 1.25rem;
+            text-align: center;
+            text-decoration: none;
+            color: var(--text);
+            display: block;
+            transition: all .25s;
+        }
+        .category-card:hover {
+            border-color: var(--amber);
+            background: rgba(232,146,42,.06);
+            transform: translateY(-3px);
+            color: var(--text);
+        }
+        .cat-icon {
+            width: 56px;
+            height: 56px;
+            background: rgba(232,146,42,.12);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            color: var(--amber);
+            font-size: 1.4rem;
+        }
+        .cat-name { font-weight: 700; font-size: .95rem; margin-bottom: .25rem; }
+        .cat-count { font-size: .8rem; color: var(--muted); }
 
-        /* How it works cards */
-        .step-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 2rem 1.5rem; text-align: center; }
-        .step-num { width: 48px; height: 48px; background: var(--amber); color: #000; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: 800; margin: 0 auto 1.2rem; }
-        .step-icon { font-size: 2rem; color: var(--amber); margin-bottom: 1rem; }
-        .step-title { font-weight: 700; font-size: 1.05rem; margin-bottom: .5rem; }
-        .step-desc { color: var(--muted); font-size: .9rem; }
+        /* ---- How It Works ---- */
+        .how-section {
+            background: var(--surface);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+        .step-number {
+            width: 48px;
+            height: 48px;
+            background: var(--amber);
+            color: #000;
+            font-weight: 900;
+            font-size: 1.2rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.25rem;
+        }
+        .step-title { font-weight: 700; font-size: 1.05rem; margin-bottom: .5rem; color: var(--text); }
+        .step-desc { color: var(--muted); font-size: .9rem; line-height: 1.6; }
 
-        /* Listing cards */
-        .listing-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; transition: border-color .2s, transform .2s; height: 100%; display: flex; flex-direction: column; }
+        /* ---- Listing Cards ---- */
+        .listing-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all .25s;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
         .listing-card:hover { border-color: rgba(232,146,42,.4); transform: translateY(-2px); }
-        .listing-photo { height: 180px; background: var(--black); display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .listing-photo {
+            height: 180px;
+            background: linear-gradient(135deg, #141D2B, #1E2D42);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--muted);
+            font-size: 2.5rem;
+            overflow: hidden;
+        }
         .listing-photo img { width: 100%; height: 100%; object-fit: cover; }
-        .listing-photo-placeholder { color: var(--muted); font-size: 3rem; }
         .listing-body { padding: 1rem; flex: 1; display: flex; flex-direction: column; }
-        .listing-cat { font-size: .72rem; font-weight: 700; background: rgba(232,146,42,.15); color: var(--amber); border: 1px solid rgba(232,146,42,.3); padding: .2rem .6rem; border-radius: 4px; text-transform: uppercase; letter-spacing: .5px; display: inline-block; margin-bottom: .5rem; }
-        .listing-title { font-weight: 700; font-size: .95rem; margin-bottom: .5rem; }
-        .listing-price { color: var(--amber); font-weight: 800; font-size: 1.05rem; }
-        .listing-owner { color: var(--muted); font-size: .8rem; }
-        .listing-footer { padding: .75rem 1rem; border-top: 1px solid var(--border); }
+        .listing-badge {
+            display: inline-block;
+            padding: .2rem .6rem;
+            background: rgba(232,146,42,.1);
+            border: 1px solid rgba(232,146,42,.2);
+            color: var(--amber);
+            border-radius: 4px;
+            font-size: .72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            margin-bottom: .5rem;
+        }
+        .listing-title { font-weight: 700; font-size: .95rem; color: var(--text); margin-bottom: .5rem; line-height: 1.3; }
+        .listing-price { font-size: 1.05rem; font-weight: 800; color: var(--green); }
+        .listing-owner { font-size: .8rem; color: var(--muted); margin-top: .5rem; }
 
-        /* CTA section */
-        .cta-section { background: linear-gradient(135deg, #1a0e00 0%, #2a1500 50%, #1a0e00 100%); border-top: 1px solid rgba(232,146,42,.2); border-bottom: 1px solid rgba(232,146,42,.2); padding: 5rem 0; }
+        /* ---- CTA ---- */
+        .cta-section {
+            background: linear-gradient(135deg, rgba(232,146,42,.12) 0%, rgba(232,146,42,.04) 100%);
+            border-top: 1px solid rgba(232,146,42,.2);
+            border-bottom: 1px solid rgba(232,146,42,.2);
+            text-align: center;
+            padding: 80px 0;
+        }
+        .cta-section h2 { font-size: clamp(1.5rem,3vw,2.5rem); font-weight: 800; color: var(--text); }
+        .cta-section p { color: var(--muted); font-size: 1.05rem; max-width: 500px; margin: 1rem auto 2rem; }
 
-        /* Footer */
-        .site-footer { background: var(--surface); border-top: 1px solid var(--border); padding: 3rem 0 1.5rem; }
-        .footer-logo { color: var(--amber); font-weight: 800; font-size: 1.2rem; }
-        .footer-tagline { color: var(--muted); font-size: .85rem; margin-top: .25rem; }
-        .footer-link { color: var(--muted); font-size: .85rem; display: block; margin-bottom: .4rem; transition: color .2s; }
-        .footer-link:hover { color: var(--amber); }
-        .footer-copyright { color: var(--muted); font-size: .8rem; }
+        /* ---- Footer ---- */
+        footer {
+            background: var(--black);
+            border-top: 1px solid var(--border);
+            padding: 2.5rem 0;
+            color: var(--muted);
+            font-size: .875rem;
+        }
+        footer a { color: var(--muted); text-decoration: none; }
+        footer a:hover { color: var(--amber); }
+        .footer-brand { color: var(--amber); font-weight: 800; font-size: 1.1rem; }
 
         [x-cloak] { display: none !important; }
+        .text-amber { color: var(--amber) !important; }
     </style>
 </head>
 <body>
-    <!-- NAVBAR -->
-    <nav class="top-navbar py-3">
-        <div class="container">
-            <div class="d-flex align-items-center justify-content-between">
-                <a href="{{ route('home') }}" class="navbar-brand">
-                    <i class="fas fa-warehouse me-2"></i>TheOnlineYard
-                </a>
 
-                <!-- Desktop Nav -->
-                <div class="d-none d-lg-flex align-items-center gap-1">
-                    <a href="{{ route('marketplace.index') }}" class="nav-link-custom">Browse</a>
-                    <a href="#how-it-works" class="nav-link-custom">How it Works</a>
-                    <a href="{{ route('register') }}" class="nav-link-custom">List Your Asset</a>
-                </div>
+<!-- NAVBAR -->
+<nav class="navbar-custom" x-data="{ open: false }">
+    <div class="container">
+        <div class="d-flex align-items-center justify-content-between">
+            <a href="{{ route('home') }}" class="navbar-brand-name">
+                <i class="fas fa-warehouse me-2"></i>TheOnlineYard
+            </a>
 
-                <div class="d-none d-lg-flex align-items-center gap-2">
-                    <a href="{{ route('login') }}" class="btn-outline-amber btn">Login</a>
-                    <a href="{{ route('register') }}" class="btn-amber btn">Get Started</a>
-                </div>
-
-                <!-- Mobile toggle -->
-                <button class="d-lg-none btn" style="color:var(--text);background:rgba(255,255,255,.05);border:1px solid var(--border);"
-                        x-data="" @click="$el.nextElementSibling.classList.toggle('d-none')">
-                    <i class="fas fa-bars"></i>
-                </button>
-            </div>
-
-            <!-- Mobile Menu -->
-            <div class="d-none d-lg-none mt-3 pb-2" style="border-top:1px solid var(--border);padding-top:.75rem;">
-                <a href="{{ route('marketplace.index') }}" class="nav-link-custom d-block mb-1">Browse</a>
-                <a href="#how-it-works" class="nav-link-custom d-block mb-1">How it Works</a>
-                <a href="{{ route('register') }}" class="nav-link-custom d-block mb-2">List Your Asset</a>
-                <div class="d-flex gap-2">
-                    <a href="{{ route('login') }}" class="btn-outline-amber btn btn-sm flex-fill">Login</a>
-                    <a href="{{ route('register') }}" class="btn-amber btn btn-sm flex-fill">Register</a>
-                </div>
-            </div>
-        </div>
-    </nav>
-
-    <!-- HERO -->
-    <section class="hero-section text-center">
-        <div class="container" style="position:relative;z-index:1;">
-            <div class="hero-badge"><i class="fas fa-shield-alt me-1"></i>Verified Owners · M-Pesa Secured</div>
-            <h1 class="hero-title mb-4">
-                Kenya's Premier <span class="amber-text">Vehicle & Machinery</span><br>Rental Platform
-            </h1>
-            <p class="hero-subtitle mx-auto mb-5">
-                Find trucks, excavators, cranes and more — with secure M-Pesa payments and verified owners. Book in minutes, drive tomorrow.
-            </p>
-            <div class="d-flex flex-wrap gap-3 justify-content-center">
-                <a href="{{ route('marketplace.index') }}" class="btn-amber btn btn-lg px-5">
-                    <i class="fas fa-search me-2"></i>Browse Listings
-                </a>
-                <a href="{{ route('register') }}" class="btn-outline-amber btn btn-lg px-5">
-                    <i class="fas fa-plus me-2"></i>List Your Asset
-                </a>
-            </div>
-        </div>
-    </section>
-
-    <!-- STATS BAR -->
-    <section class="stats-bar">
-        <div class="container">
-            <div class="row text-center g-3">
-                <div class="col-6 col-md-3">
-                    <div class="stat-item">
-                        <span class="value">500+</span>
-                        <span class="label">Vehicles & Machinery</span>
-                    </div>
-                </div>
-                <div class="col-6 col-md-3">
-                    <div class="stat-item">
-                        <span class="value">200+</span>
-                        <span class="label">Verified Owners</span>
-                    </div>
-                </div>
-                <div class="col-6 col-md-3">
-                    <div class="stat-item">
-                        <span class="value">1,000+</span>
-                        <span class="label">Bookings Completed</span>
-                    </div>
-                </div>
-                <div class="col-6 col-md-3">
-                    <div class="stat-item">
-                        <span class="value">100%</span>
-                        <span class="label">Secure Payments</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- CATEGORIES -->
-    <section class="py-6" style="padding:5rem 0;">
-        <div class="container">
-            <div class="text-center mb-5">
-                <h2 class="section-title">Browse by <span class="amber-text">Category</span></h2>
-                <p class="section-sub mb-0">Find exactly what you need from our wide range of equipment</p>
-            </div>
-            <div class="row g-3">
-                @if($categories->isNotEmpty())
-                    @foreach($categories as $cat)
-                    <div class="col-6 col-md-4 col-lg-2">
-                        <a href="{{ route('marketplace.index', ['category' => $cat->id]) }}" class="cat-card">
-                            <div class="cat-icon">
-                                <i class="fas {{ $cat->icon ?? 'fa-box' }}"></i>
-                            </div>
-                            <div class="cat-name">{{ $cat->name }}</div>
-                            <div class="cat-count">{{ $cat->listings_count }} listing{{ $cat->listings_count != 1 ? 's' : '' }}</div>
-                        </a>
-                    </div>
-                    @endforeach
+            <!-- Desktop links -->
+            <div class="d-none d-md-flex align-items-center gap-4">
+                <a href="{{ route('marketplace') }}" class="nav-lnk">Browse</a>
+                <a href="#how-it-works" class="nav-lnk">How it Works</a>
+                @auth
+                    <a href="{{ route('dashboard') }}" class="nav-lnk">Dashboard</a>
+                    <a href="{{ route('listings.create') }}" class="btn btn-sm btn-amber rounded-pill px-3">List Your Asset</a>
                 @else
-                    @php
-                        $placeholders = [
-                            ['icon' => 'fa-truck', 'name' => 'Trucks'],
-                            ['icon' => 'fa-hard-hat', 'name' => 'Excavators'],
-                            ['icon' => 'fa-cogs', 'name' => 'Cranes'],
-                            ['icon' => 'fa-car', 'name' => 'Vehicles'],
-                            ['icon' => 'fa-tractor', 'name' => 'Tractors'],
-                            ['icon' => 'fa-tools', 'name' => 'Equipment'],
-                        ];
-                    @endphp
-                    @foreach($placeholders as $ph)
-                    <div class="col-6 col-md-4 col-lg-2">
-                        <a href="{{ route('marketplace.index') }}" class="cat-card">
-                            <div class="cat-icon"><i class="fas {{ $ph['icon'] }}"></i></div>
-                            <div class="cat-name">{{ $ph['name'] }}</div>
-                            <div class="cat-count">Coming soon</div>
-                        </a>
-                    </div>
-                    @endforeach
-                @endif
+                    <a href="{{ route('login') }}" class="nav-lnk">Login</a>
+                    <a href="{{ route('register') }}" class="btn btn-sm btn-amber rounded-pill px-3">Register</a>
+                @endauth
+            </div>
+
+            <!-- Mobile toggle -->
+            <button class="d-md-none btn p-1 px-2" style="color:var(--muted);border:1px solid var(--border)" @click="open=!open">
+                <i class="fas" :class="open ? 'fa-times' : 'fa-bars'"></i>
+            </button>
+        </div>
+
+        <!-- Mobile menu -->
+        <div class="d-md-none mt-3 pb-2" x-show="open" x-cloak x-transition>
+            <div class="d-flex flex-column gap-2">
+                <a href="{{ route('marketplace') }}" class="nav-lnk py-1">Browse</a>
+                <a href="#how-it-works" class="nav-lnk py-1">How it Works</a>
+                @auth
+                    <a href="{{ route('dashboard') }}" class="nav-lnk py-1">Dashboard</a>
+                    <a href="{{ route('listings.create') }}" class="btn btn-amber w-100 mt-1">List Your Asset</a>
+                @else
+                    <a href="{{ route('login') }}" class="nav-lnk py-1">Login</a>
+                    <a href="{{ route('register') }}" class="btn btn-amber w-100 mt-1">Register Free</a>
+                @endauth
             </div>
         </div>
-    </section>
+    </div>
+</nav>
 
-    <!-- HOW IT WORKS -->
-    <section id="how-it-works" style="padding:5rem 0;background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
-        <div class="container">
-            <div class="text-center mb-5">
-                <h2 class="section-title">How It <span class="amber-text">Works</span></h2>
-                <p class="section-sub mb-0">Get started in three simple steps</p>
+<!-- HERO -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-6">
+                <div class="hero-badge">
+                    <i class="fas fa-map-marker-alt"></i> Kenya's #1 Rental Platform
+                </div>
+                <h1 class="hero-title">
+                    Kenya's Premier<br>
+                    <span>Vehicle & Machinery</span><br>
+                    Rental Platform
+                </h1>
+                <p class="hero-subtitle">
+                    Find trucks, excavators, cranes and more — with secure M-Pesa payments and verified owners. Book in minutes, work tomorrow.
+                </p>
+                <div class="d-flex flex-wrap gap-3">
+                    <a href="{{ route('marketplace') }}" class="btn btn-amber btn-lg px-4">
+                        <i class="fas fa-search me-2"></i>Browse Listings
+                    </a>
+                    <a href="{{ route('register') }}" class="btn btn-outline-amber btn-lg px-4">
+                        <i class="fas fa-plus me-2"></i>List Your Asset
+                    </a>
+                </div>
+                <div class="d-flex flex-wrap gap-3 mt-4">
+                    <span style="font-size:.8rem;color:var(--muted)"><i class="fas fa-shield-alt text-amber me-1"></i> Verified owners</span>
+                    <span style="font-size:.8rem;color:var(--muted)"><i class="fas fa-mobile-alt text-amber me-1"></i> M-Pesa payments</span>
+                    <span style="font-size:.8rem;color:var(--muted)"><i class="fas fa-headset text-amber me-1"></i> 24/7 support</span>
+                </div>
             </div>
-            <div class="row g-4 justify-content-center">
-                <div class="col-md-4">
-                    <div class="step-card">
-                        <div class="step-num">1</div>
-                        <div class="step-icon"><i class="fas fa-search"></i></div>
-                        <div class="step-title">Browse & Book</div>
-                        <p class="step-desc">Search through hundreds of verified vehicles and machinery. Filter by category, location, and availability. Book your chosen equipment in minutes.</p>
+            <div class="col-lg-6 d-none d-lg-block">
+                <div class="hero-grid">
+                    <div class="hero-grid-card">
+                        <i class="fas fa-truck-moving"></i>
+                        <span>Trucks & Lorries</span>
                     </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="step-card">
-                        <div class="step-num">2</div>
-                        <div class="step-icon"><i class="fas fa-mobile-alt"></i></div>
-                        <div class="step-title">Secure Payment via M-Pesa</div>
-                        <p class="step-desc">Pay securely using M-Pesa STK push. Your funds are held in escrow until the rental is complete — protecting both you and the owner.</p>
+                    <div class="hero-grid-card">
+                        <i class="fas fa-tractor"></i>
+                        <span>Heavy Machinery</span>
                     </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="step-card">
-                        <div class="step-num">3</div>
-                        <div class="step-icon"><i class="fas fa-key"></i></div>
-                        <div class="step-title">Pick Up & Use</div>
-                        <p class="step-desc">Coordinate with the verified owner, pick up your equipment, and get to work. When done, mark the booking complete and the owner gets paid.</p>
+                    <div class="hero-grid-card">
+                        <i class="fas fa-car"></i>
+                        <span>Cars & SUVs</span>
                     </div>
                 </div>
             </div>
         </div>
-    </section>
+    </div>
+</section>
 
-    <!-- FEATURED LISTINGS -->
-    @if(isset($featuredListings) && $featuredListings->isNotEmpty())
-    <section style="padding:5rem 0;">
-        <div class="container">
-            <div class="text-center mb-5">
-                <h2 class="section-title">Featured <span class="amber-text">Listings</span></h2>
-                <p class="section-sub mb-0">Hand-picked equipment from verified owners</p>
+<!-- STATS BAR -->
+<section class="stats-bar">
+    <div class="container">
+        <div class="row g-3 text-center">
+            <div class="col-6 col-md-3">
+                <span class="stat-number">{{ isset($stats) ? number_format($stats['total_listings']) . '+' : '500+' }}</span>
+                <div class="stat-label">Vehicles & Machines</div>
             </div>
-            <div class="row g-4">
-                @foreach($featuredListings as $listing)
-                <div class="col-md-6 col-lg-4">
-                    <div class="listing-card">
-                        <div class="listing-photo">
-                            @if($listing->primaryPhoto?->url)
-                                <img src="{{ $listing->primaryPhoto->url }}" alt="{{ $listing->title }}">
-                            @else
-                                <div class="listing-photo-placeholder">
-                                    <i class="fas fa-truck"></i>
-                                </div>
-                            @endif
+            <div class="col-6 col-md-3">
+                <span class="stat-number">{{ isset($stats) ? number_format($stats['total_yards']) . '+' : '200+' }}</span>
+                <div class="stat-label">Verified Owners</div>
+            </div>
+            <div class="col-6 col-md-3">
+                <span class="stat-number">{{ isset($stats) ? number_format($stats['total_bookings']) . '+' : '1,000+' }}</span>
+                <div class="stat-label">Bookings Completed</div>
+            </div>
+            <div class="col-6 col-md-3">
+                <span class="stat-number">100%</span>
+                <div class="stat-label">Secure Payments</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CATEGORIES -->
+<section style="padding: 5rem 0">
+    <div class="container">
+        <div class="text-center mb-5">
+            <div class="section-eyebrow">Browse by Category</div>
+            <h2 class="section-title">Find What You Need</h2>
+            <p class="section-subtitle">From light vehicles to heavy construction equipment</p>
+        </div>
+
+        <div class="row g-3">
+            @forelse($categories as $category)
+            <div class="col-6 col-md-4 col-lg-2">
+                <a href="{{ route('marketplace') }}?category={{ $category->id }}" class="category-card">
+                    <div class="cat-icon">
+                        <i class="fas {{ $category->icon ?: 'fa-tag' }}"></i>
+                    </div>
+                    <div class="cat-name">{{ $category->name }}</div>
+                    <div class="cat-count">{{ $category->listings_count }} listing{{ $category->listings_count != 1 ? 's' : '' }}</div>
+                </a>
+            </div>
+            @empty
+            @foreach([['fa-truck','Trucks & Lorries'],['fa-tractor','Heavy Machinery'],['fa-car','Cars & SUVs'],['fa-hard-hat','Construction'],['fa-anchor','Marine'],['fa-tools','Equipment']] as $ph)
+            <div class="col-6 col-md-4 col-lg-2">
+                <a href="{{ route('marketplace') }}" class="category-card">
+                    <div class="cat-icon"><i class="fas {{ $ph[0] }}"></i></div>
+                    <div class="cat-name">{{ $ph[1] }}</div>
+                    <div class="cat-count">Browse all</div>
+                </a>
+            </div>
+            @endforeach
+            @endforelse
+        </div>
+
+        <div class="text-center mt-4">
+            <a href="{{ route('marketplace') }}" class="btn btn-outline-amber">
+                View All Listings <i class="fas fa-arrow-right ms-2"></i>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how-it-works" class="how-section" style="padding: 5rem 0">
+    <div class="container">
+        <div class="text-center mb-5">
+            <div class="section-eyebrow">Simple Process</div>
+            <h2 class="section-title">How It Works</h2>
+            <p class="section-subtitle">Get your equipment in 3 easy steps</p>
+        </div>
+
+        <div class="row g-4 justify-content-center">
+            <div class="col-md-4 text-center">
+                <div class="step-number">1</div>
+                <h5 class="step-title">Browse & Book</h5>
+                <p class="step-desc">Search thousands of verified listings. Filter by type, location, price and availability. Choose your dates and confirm instantly.</p>
+            </div>
+            <div class="col-md-4 text-center">
+                <div class="step-number">2</div>
+                <h5 class="step-title">Secure M-Pesa Payment</h5>
+                <p class="step-desc">Pay safely with M-Pesa directly from your phone. Funds are held in escrow until your rental is complete — you're always protected.</p>
+            </div>
+            <div class="col-md-4 text-center">
+                <div class="step-number">3</div>
+                <h5 class="step-title">Pick Up & Use</h5>
+                <p class="step-desc">Coordinate pickup with the owner. Use your equipment, then return it. Funds are released to the owner automatically on completion.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FEATURED LISTINGS -->
+@if(isset($featuredListings) && $featuredListings->isNotEmpty())
+<section style="padding: 5rem 0">
+    <div class="container">
+        <div class="text-center mb-5">
+            <div class="section-eyebrow">Featured</div>
+            <h2 class="section-title">Top Listings</h2>
+            <p class="section-subtitle">Hand-picked assets from verified owners</p>
+        </div>
+
+        <div class="row g-4">
+            @foreach($featuredListings as $listing)
+            <div class="col-md-6 col-lg-4">
+                <div class="listing-card">
+                    <div class="listing-photo">
+                        @if($listing->photos->isNotEmpty())
+                            <img src="{{ asset('storage/' . $listing->photos->first()->path) }}" alt="{{ $listing->title }}">
+                        @else
+                            <i class="fas fa-image"></i>
+                        @endif
+                    </div>
+                    <div class="listing-body">
+                        @if($listing->category)
+                            <span class="listing-badge">{{ $listing->category->name }}</span>
+                        @endif
+                        <div class="listing-title">{{ $listing->title }}</div>
+                        <div class="listing-price">
+                            KES {{ number_format($listing->daily_rate) }}<small style="font-size:.75rem;font-weight:500;color:var(--muted)">/day</small>
                         </div>
-                        <div class="listing-body">
-                            @if($listing->category)
-                                <span class="listing-cat">{{ $listing->category->name }}</span>
-                            @endif
-                            <div class="listing-title">{{ $listing->title }}</div>
-                            <div class="d-flex align-items-center justify-content-between mt-auto pt-2">
-                                <div class="listing-price">KES {{ number_format($listing->daily_rate ?? 0) }}<small style="font-weight:400;color:var(--muted);font-size:.75rem;">/day</small></div>
-                                <div class="listing-owner"><i class="fas fa-user me-1"></i>{{ $listing->user?->name }}</div>
-                            </div>
+                        <div class="listing-owner">
+                            <i class="fas fa-user-circle me-1"></i>{{ $listing->user?->name ?? 'Verified Owner' }}
                         </div>
-                        <div class="listing-footer">
-                            <a href="{{ route('listings.show', $listing->slug ?? $listing->id) }}" class="btn btn-sm w-100"
-                               style="background:rgba(232,146,42,.12);color:var(--amber);border:1px solid rgba(232,146,42,.3);font-weight:600;">
+                        <div class="mt-auto pt-3">
+                            <a href="{{ route('listings.show', $listing->slug ?? $listing->id) }}" class="btn btn-amber btn-sm w-100">
                                 View Details <i class="fas fa-arrow-right ms-1"></i>
                             </a>
                         </div>
                     </div>
                 </div>
-                @endforeach
             </div>
-            <div class="text-center mt-5">
-                <a href="{{ route('marketplace.index') }}" class="btn-amber btn btn-lg px-5">
-                    <i class="fas fa-th-large me-2"></i>View All Listings
-                </a>
-            </div>
+            @endforeach
         </div>
-    </section>
-    @endif
 
-    <!-- CTA SECTION -->
-    <section class="cta-section text-center">
-        <div class="container">
-            <h2 class="section-title mb-3">Ready to earn from your <span class="amber-text">assets?</span></h2>
-            <p style="color:var(--muted);font-size:1.1rem;max-width:550px;margin:0 auto 2rem;">
-                List your vehicle or machinery and reach hundreds of clients across Kenya. Start earning today with zero upfront costs.
-            </p>
-            <a href="{{ route('register') }}" class="btn-amber btn btn-lg px-5">
-                <i class="fas fa-rocket me-2"></i>Get Started Free
+        <div class="text-center mt-4">
+            <a href="{{ route('marketplace') }}" class="btn btn-outline-amber">
+                Browse All Listings <i class="fas fa-arrow-right ms-2"></i>
             </a>
         </div>
-    </section>
+    </div>
+</section>
+@endif
 
-    <!-- FOOTER -->
-    <footer class="site-footer">
-        <div class="container">
-            <div class="row g-4 mb-4">
-                <div class="col-md-4">
-                    <div class="footer-logo"><i class="fas fa-warehouse me-2"></i>TheOnlineYard</div>
-                    <div class="footer-tagline">Kenya's premier vehicle & machinery rental marketplace. Connecting owners with clients safely and efficiently.</div>
-                </div>
-                <div class="col-md-2 col-6">
-                    <div style="font-weight:700;font-size:.85rem;margin-bottom:.75rem;color:var(--text);">Platform</div>
-                    <a href="{{ route('marketplace.index') }}" class="footer-link">Browse Listings</a>
-                    <a href="{{ route('register') }}" class="footer-link">List Your Asset</a>
-                    <a href="#how-it-works" class="footer-link">How it Works</a>
-                </div>
-                <div class="col-md-2 col-6">
-                    <div style="font-weight:700;font-size:.85rem;margin-bottom:.75rem;color:var(--text);">Account</div>
-                    <a href="{{ route('login') }}" class="footer-link">Login</a>
-                    <a href="{{ route('register') }}" class="footer-link">Register</a>
-                    <a href="{{ route('dashboard') }}" class="footer-link">Dashboard</a>
-                </div>
-                <div class="col-md-4">
-                    <div style="font-weight:700;font-size:.85rem;margin-bottom:.75rem;color:var(--text);">Why TheOnlineYard?</div>
-                    <div style="color:var(--muted);font-size:.85rem;">
-                        <div class="mb-1"><i class="fas fa-check-circle me-2" style="color:var(--green);"></i>M-Pesa escrow payments</div>
-                        <div class="mb-1"><i class="fas fa-check-circle me-2" style="color:var(--green);"></i>KYC-verified owners</div>
-                        <div class="mb-1"><i class="fas fa-check-circle me-2" style="color:var(--green);"></i>Dispute resolution support</div>
-                        <div><i class="fas fa-check-circle me-2" style="color:var(--green);"></i>Kenya-wide coverage</div>
-                    </div>
+<!-- CTA -->
+<section class="cta-section">
+    <div class="container">
+        <div class="d-inline-flex align-items-center gap-2 mb-3" style="background:rgba(232,146,42,.1);border:1px solid rgba(232,146,42,.25);color:var(--amber);border-radius:20px;padding:.3rem .9rem;font-size:.78rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase">
+            <i class="fas fa-rocket"></i> Get Started Today
+        </div>
+        <h2>Ready to List Your Asset?</h2>
+        <p>Join 200+ verified owners earning passive income by renting out their vehicles and machinery on TheOnlineYard.</p>
+        <div class="d-flex flex-wrap justify-content-center gap-3">
+            <a href="{{ route('register') }}" class="btn btn-amber btn-lg px-5">
+                <i class="fas fa-user-plus me-2"></i>Register Free
+            </a>
+            <a href="{{ route('marketplace') }}" class="btn btn-outline-amber btn-lg px-5">
+                <i class="fas fa-search me-2"></i>Browse First
+            </a>
+        </div>
+        <p class="mt-3" style="font-size:.8rem;color:var(--muted)">No listing fees. Pay only when you earn.</p>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+    <div class="container">
+        <div class="row g-4 mb-4">
+            <div class="col-md-4">
+                <div class="footer-brand mb-2"><i class="fas fa-warehouse me-2"></i>TheOnlineYard</div>
+                <p style="font-size:.85rem;line-height:1.7;color:var(--muted)">
+                    Kenya's premier marketplace for vehicle and machinery rentals. Connecting equipment owners with businesses that need them.
+                </p>
+            </div>
+            <div class="col-md-2">
+                <div style="font-weight:700;color:var(--text);margin-bottom:.75rem;font-size:.85rem">Platform</div>
+                <div class="d-flex flex-column gap-2">
+                    <a href="{{ route('marketplace') }}">Browse Listings</a>
+                    <a href="{{ route('register') }}">List an Asset</a>
+                    @auth
+                        <a href="{{ route('dashboard') }}">My Dashboard</a>
+                    @else
+                        <a href="{{ route('login') }}">Sign In</a>
+                    @endauth
                 </div>
             </div>
-            <div class="border-top pt-3" style="border-color:var(--border) !important;">
-                <div class="footer-copyright text-center">
-                    &copy; {{ date('Y') }} TheOnlineYard. All rights reserved. &nbsp;|&nbsp; Made for Kenya
+            <div class="col-md-2">
+                <div style="font-weight:700;color:var(--text);margin-bottom:.75rem;font-size:.85rem">Company</div>
+                <div class="d-flex flex-column gap-2">
+                    <a href="#how-it-works">How it Works</a>
+                    <a href="#">About Us</a>
+                    <a href="#">Contact</a>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div style="font-weight:700;color:var(--text);margin-bottom:.75rem;font-size:.85rem">Contact</div>
+                <div class="d-flex flex-column gap-2">
+                    <span><i class="fas fa-envelope me-2 text-amber"></i>info@theonlineyard.co.ke</span>
+                    <span><i class="fas fa-phone me-2 text-amber"></i>+254 700 000 000</span>
+                    <span><i class="fas fa-map-marker-alt me-2 text-amber"></i>Nairobi, Kenya</span>
                 </div>
             </div>
         </div>
-    </footer>
+        <hr style="border-color:var(--border);margin:1.5rem 0">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+            <span>&copy; {{ date('Y') }} TheOnlineYard. All rights reserved.</span>
+            <div class="d-flex gap-3">
+                <a href="#">Privacy Policy</a>
+                <a href="#">Terms of Service</a>
+            </div>
+        </div>
+    </div>
+</footer>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </body>
 </html>
