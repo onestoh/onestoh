@@ -72,6 +72,31 @@
     </div>
 </div>
 
+{{-- M-Pesa Top-up --}}
+<div class="p-3 rounded-3 mb-4" style="background:var(--surface);border:1px solid var(--border)">
+    <h6 style="color:var(--text);font-weight:600;margin-bottom:.75rem"><i class="fas fa-plus-circle me-2 text-amber"></i>Top Up Wallet via M-Pesa</h6>
+    <form method="POST" action="{{ route('wallet.topup') }}" class="row g-2 align-items-end">
+        @csrf
+        <div class="col-sm-4">
+            <label class="form-label">Amount (KES)</label>
+            <input type="number" name="amount" class="form-control form-control-sm @error('amount') is-invalid @enderror"
+                min="100" max="100000" step="50" placeholder="Min KES 100" value="{{ old('amount') }}">
+            @error('amount')<div class="invalid-feedback">{{ $message }}</div>@enderror
+        </div>
+        <div class="col-sm-4">
+            <label class="form-label">M-Pesa Phone Number</label>
+            <input type="text" name="phone" class="form-control form-control-sm @error('phone') is-invalid @enderror"
+                placeholder="07XXXXXXXX" value="{{ old('phone', auth()->user()->phone) }}">
+            @error('phone')<div class="invalid-feedback">{{ $message }}</div>@enderror
+        </div>
+        <div class="col-sm-4">
+            <button type="submit" class="btn btn-amber btn-sm w-100">
+                <i class="fas fa-mobile-alt me-1"></i>Top Up via M-Pesa
+            </button>
+        </div>
+    </form>
+</div>
+
 <div class="row g-4">
     {{-- Transactions --}}
     <div class="col-lg-8">
