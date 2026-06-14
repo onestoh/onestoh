@@ -74,30 +74,34 @@
         
         <nav class="sidebar-nav">
             <div class="sidebar-section">Main</div>
-            <a href="#" class="sidebar-link active"><i class="fas fa-tachometer-alt"></i>Dashboard</a>
-            <a href="#" class="sidebar-link"><i class="fas fa-user"></i>My Profile</a>
-            <a href="#" class="sidebar-link"><i class="fas fa-wallet"></i>Wallet</a>
-            <a href="#" class="sidebar-link"><i class="fas fa-bell"></i>Notifications</a>
-            
+            <a href="{{ route('dashboard') }}" class="sidebar-link {{ request()->routeIs('dashboard') ? 'active' : '' }}"><i class="fas fa-tachometer-alt"></i>Dashboard</a>
+            <a href="{{ route('profile.edit') }}" class="sidebar-link {{ request()->routeIs('profile.*') ? 'active' : '' }}"><i class="fas fa-user"></i>My Profile</a>
+            <a href="{{ route('wallet.index') }}" class="sidebar-link {{ request()->routeIs('wallet.*') ? 'active' : '' }}"><i class="fas fa-wallet"></i>Wallet</a>
+            <a href="{{ route('notifications.index') }}" class="sidebar-link {{ request()->routeIs('notifications.*') ? 'active' : '' }}"><i class="fas fa-bell"></i>Notifications</a>
+
             @if(auth()->user() && in_array(auth()->user()->role, ['yard_owner','individual_owner','super_admin']))
             <div class="sidebar-section">My Listings</div>
-            <a href="#" class="sidebar-link"><i class="fas fa-list"></i>All Listings</a>
-            <a href="#" class="sidebar-link"><i class="fas fa-plus"></i>Add Listing</a>
-            <a href="#" class="sidebar-link"><i class="fas fa-calendar-check"></i>Availability</a>
+            <a href="{{ route('listings.index') }}" class="sidebar-link {{ request()->routeIs('listings.*') ? 'active' : '' }}"><i class="fas fa-list"></i>All Listings</a>
+            <a href="{{ route('listings.create') }}" class="sidebar-link"><i class="fas fa-plus"></i>Add Listing</a>
+            <a href="{{ route('yards.index') }}" class="sidebar-link {{ request()->routeIs('yards.*') ? 'active' : '' }}"><i class="fas fa-warehouse"></i>My Yards</a>
             @endif
 
             @if(auth()->user() && auth()->user()->role === 'broker')
             <div class="sidebar-section">Broker Tools</div>
-            <a href="#" class="sidebar-link"><i class="fas fa-handshake"></i>My Deals</a>
-            <a href="#" class="sidebar-link"><i class="fas fa-percent"></i>Commissions</a>
+            <a href="{{ route('broker.dashboard') }}" class="sidebar-link {{ request()->routeIs('broker.*') ? 'active' : '' }}"><i class="fas fa-handshake"></i>Broker Dashboard</a>
+            <a href="{{ route('broker.commissions') }}" class="sidebar-link"><i class="fas fa-percent"></i>Commissions</a>
+            @endif
+
+            @if(auth()->user() && auth()->user()->role === 'operator')
+            <div class="sidebar-section">Operator</div>
+            <a href="{{ route('operator.assignments') }}" class="sidebar-link {{ request()->routeIs('operator.*') ? 'active' : '' }}"><i class="fas fa-steering-wheel"></i>Assignments</a>
             @endif
 
             <div class="sidebar-section">Bookings</div>
-            <a href="#" class="sidebar-link"><i class="fas fa-calendar"></i>My Bookings</a>
-            <a href="#" class="sidebar-link"><i class="fas fa-history"></i>Booking History</a>
-            
+            <a href="{{ route('bookings.index') }}" class="sidebar-link {{ request()->routeIs('bookings.*') ? 'active' : '' }}"><i class="fas fa-calendar"></i>My Bookings</a>
+
             <div class="sidebar-section">Account</div>
-            <a href="#" class="sidebar-link"><i class="fas fa-id-card"></i>KYC Verification</a>
+            <a href="{{ route('kyc.index') }}" class="sidebar-link {{ request()->routeIs('kyc.*') ? 'active' : '' }}"><i class="fas fa-id-card"></i>KYC Verification</a>
             <a href="#" class="sidebar-link"><i class="fas fa-cog"></i>Settings</a>
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
