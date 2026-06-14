@@ -50,6 +50,11 @@ class Listing extends Model
         return $this->hasMany(ListingPhoto::class);
     }
 
+    public function primaryPhoto()
+    {
+        return $this->hasOne(ListingPhoto::class)->where('is_primary', true)->orderBy('sort_order');
+    }
+
     public function availabilitySlots()
     {
         return $this->hasMany(AvailabilitySlot::class);
