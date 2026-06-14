@@ -10,9 +10,10 @@ class KycController extends Controller
 {
     public function index()
     {
-        $documents = auth()->user()->kycDocuments->groupBy('document_type');
+        $user = auth()->user();
+        $documents = $user->kycDocuments()->orderBy('created_at', 'desc')->get()->groupBy('document_type');
 
-        return view('kyc.index', compact('documents'));
+        return view('kyc.index', compact('documents', 'user'));
     }
 
     public function store(Request $request)
