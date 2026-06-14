@@ -132,6 +132,7 @@ Route::middleware(['auth', 'role:super_admin'])->prefix('admin')->name('admin.')
 
     Route::resource('disputes', AdminDisputeController::class);
     Route::post('disputes/{dispute}/rule', [AdminDisputeController::class, 'rule'])->name('disputes.rule');
+    Route::post('disputes/{dispute}/resolve', [AdminDisputeController::class, 'resolve'])->name('disputes.resolve');
 
     Route::get('payouts', [AdminPayoutController::class, 'index'])->name('payouts.index');
     Route::post('payouts/{payout}/approve', [AdminPayoutController::class, 'approve'])->name('payouts.approve');
