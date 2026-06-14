@@ -74,4 +74,14 @@ class Listing extends Model
     {
         return $query->where('is_featured', true);
     }
+
+    public function scopeForRent($query)
+    {
+        return $query->whereIn('listing_mode', ['rental', 'both']);
+    }
+
+    public function scopeForSale($query)
+    {
+        return $query->whereIn('listing_mode', ['sale', 'both']);
+    }
 }
