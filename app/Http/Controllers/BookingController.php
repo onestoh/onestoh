@@ -4,8 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Booking;
 use App\Models\Listing;
+use App\Models\Payment;
 use App\Models\PlatformSetting;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class BookingController extends Controller
 {
@@ -90,6 +93,155 @@ class BookingController extends Controller
             'monthly' => ceil($start->diffInDays($end) / 30) * ($listing->monthly_rate ?? 0),
             default   => ceil($start->diffInDays($end)) * ($listing->daily_rate ?? 0),
         };
+    }
+
+    public function pay(Booking $booking)
+    {
+        abort_unless($booking->client_id === auth()->id(), 403);
+        abort_unless($booking->status === 'pending_payment', 403);
+
+        if ($booking->isHoldExpired()) {
+            $booking->update(['status' => 'cancelled']);
+            return redirect()->route('bookings.index')->with('error', 'Booking expired. Please create a new booking.');
+        }
+
+        return view('bookings.pay', compact('booking'));
+    }
+
+    public function mpesaPay(Request $request, Booking $booking)
+    {
+        abort_unless($booking->client_id === auth()->id(), 403);
+        abort_unless($booking->status === 'pending_payment', 403);
+
+        $data = $request->validate([
+            'phone' => ['required', 'string', 'regex:/^(?:254|\+254|0)?(7[0-9]{8})$/'],
+        ]);
+
+        $phone = preg_replace('/^(\+?254|0)/', '254', $data['phone']);
+        $amount = (int) ceil($booking->total_amount);
+
+        $stkResult = $this->initiateMpesaStk($phone, $amount, $booking->booking_ref);
+
+        if ($stkResult['success']) {
+            Payment::create([
+                'booking_id'       => $booking->id,
+                'user_id'          => auth()->id(),
+                'amount'           => $booking->total_amount,
+                'payment_method'   => 'mpesa',
+                'status'           => 'pending',
+                'gateway_ref'      => $stkResult['checkout_request_id'],
+                'gateway_response' => $stkResult['response'],
+            ]);
+
+            return back()->with('success', 'M-Pesa prompt sent to ' . $data['phone'] . '. Enter your PIN to complete payment.');
+        }
+
+        return back()->withErrors(['phone' => 'M-Pesa request failed. ' . ($stkResult['message'] ?? 'Please try again.')]);
+    }
+
+    public function mpesaCallback(Request $request)
+    {
+        $body = $request->input('Body.stkCallback');
+        if (!$body) return response()->json(['status' => 'ok']);
+
+        $checkoutId = $body['CheckoutRequestID'] ?? null;
+        $resultCode = $body['ResultCode'] ?? 1;
+
+        $payment = Payment::where('gateway_ref', $checkoutId)->first();
+        if (!$payment) return response()->json(['status' => 'ok']);
+
+        if ($resultCode == 0) {
+            $meta = collect($body['CallbackMetadata']['Item'] ?? []);
+            $receiptNo = $meta->firstWhere('Name', 'MpesaReceiptNumber')['Value'] ?? null;
+
+            $payment->update(['status' => 'completed', 'mpesa_receipt' => $receiptNo]);
+            $payment->booking->update(['status' => 'confirmed']);
+
+            // Credit owner wallet minus platform fee
+            $listing = $payment->booking->listing;
+            if ($listing?->user) {
+                $ownerAmount = $payment->booking->base_amount - ($payment->booking->platform_fee ?? 0);
+                $listing->user->wallet?->credit($ownerAmount, 'booking_payment', "Booking {$payment->booking->booking_ref}", $payment->booking->id);
+            }
+        } else {
+            $payment->update(['status' => 'failed', 'gateway_response' => $body]);
+        }
+
+        return response()->json(['status' => 'ok']);
+    }
+
+    public function start(Booking $booking)
+    {
+        abort_unless($booking->listing?->user_id === auth()->id(), 403);
+        abort_unless($booking->status === 'confirmed', 403);
+        $booking->update(['status' => 'active']);
+        return back()->with('success', 'Booking marked as active.');
+    }
+
+    public function complete(Booking $booking)
+    {
+        abort_unless($booking->listing?->user_id === auth()->id(), 403);
+        abort_unless($booking->status === 'active', 403);
+        $booking->update(['status' => 'completed']);
+        return back()->with('success', 'Booking marked as completed.');
+    }
+
+    public function dispute(Request $request, Booking $booking)
+    {
+        abort_unless($booking->client_id === auth()->id(), 403);
+        $request->validate(['reason' => ['required', 'string', 'min:20']]);
+        $booking->update(['status' => 'disputed']);
+        \App\Models\Dispute::create([
+            'booking_id'   => $booking->id,
+            'raised_by'    => auth()->id(),
+            'reason'       => $request->reason,
+            'status'       => 'open',
+        ]);
+        return back()->with('success', 'Dispute raised. Our team will review within 48 hours.');
+    }
+
+    private function initiateMpesaStk(string $phone, int $amount, string $reference): array
+    {
+        $consumerKey    = config('services.mpesa.consumer_key', '');
+        $consumerSecret = config('services.mpesa.consumer_secret', '');
+        $shortcode      = config('services.mpesa.shortcode', '174379');
+        $passkey        = config('services.mpesa.passkey', '');
+        $env            = config('services.mpesa.env', 'sandbox');
+        $baseUrl        = $env === 'production' ? 'https://api.safaricom.co.ke' : 'https://sandbox.safaricom.co.ke';
+
+        try {
+            // Get token
+            $tokenRes = Http::withBasicAuth($consumerKey, $consumerSecret)
+                ->get("{$baseUrl}/oauth/v1/generate?grant_type=client_credentials");
+            $token = $tokenRes->json('access_token');
+
+            $timestamp = now()->format('YmdHis');
+            $password  = base64_encode($shortcode . $passkey . $timestamp);
+            $callbackUrl = url('/payments/mpesa/callback');
+
+            $res = Http::withToken($token)->post("{$baseUrl}/mpesa/stkpush/v1/processrequest", [
+                'BusinessShortCode' => $shortcode,
+                'Password'          => $password,
+                'Timestamp'         => $timestamp,
+                'TransactionType'   => 'CustomerPayBillOnline',
+                'Amount'            => $amount,
+                'PartyA'            => $phone,
+                'PartyB'            => $shortcode,
+                'PhoneNumber'       => $phone,
+                'CallBackURL'       => $callbackUrl,
+                'AccountReference'  => $reference,
+                'TransactionDesc'   => 'TheOnlineYard Booking',
+            ]);
+
+            if ($res->successful() && $res->json('ResponseCode') === '0') {
+                return ['success' => true, 'checkout_request_id' => $res->json('CheckoutRequestID'), 'response' => $res->json()];
+            }
+
+            return ['success' => false, 'message' => $res->json('errorMessage') ?? 'STK push failed', 'response' => $res->json()];
+        } catch (\Exception $e) {
+            Log::error('M-Pesa STK error: ' . $e->getMessage());
+            return ['success' => false, 'message' => 'Payment service unavailable.'];
+        }
     }
 
     public function cancel(Booking $booking)
