@@ -5,23 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'TheOnlineYard') — Vehicle & Machinery Rental</title>
-    
+
     <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
-    
+
+    @php
+    $primaryColor   = \App\Models\PlatformSetting::get('primary_color', '#E8922A');
+    $secondaryColor = \App\Models\PlatformSetting::get('secondary_color', '#2ECC8A');
+    $gradientStart  = \App\Models\PlatformSetting::get('gradient_start', '#E8922A');
+    $gradientEnd    = \App\Models\PlatformSetting::get('gradient_end', '#E84040');
+    @endphp
     <style>
         :root {
             --black: #080C12;
             --dark: #0B1018;
             --surface: #141D2B;
-            --amber: #E8922A;
+            --amber: {{ $primaryColor }};
             --text: #DCE5F2;
             --muted: #7088A8;
-            --green: #2ECC8A;
+            --green: {{ $secondaryColor }};
             --danger: #E84040;
             --border: #1E2D42;
+            --gradient: linear-gradient(135deg, {{ $gradientStart }}, {{ $gradientEnd }});
         }
         body { background-color: var(--dark); color: var(--text); font-family: 'Segoe UI', sans-serif; }
         .navbar-brand { color: var(--amber) !important; font-weight: 800; font-size: 1.4rem; letter-spacing: -0.5px; }
@@ -47,7 +54,7 @@
     <nav class="navbar navbar-expand-lg sticky-top">
         <div class="container">
             <a class="navbar-brand" href="{{ url('/') }}">
-                <i class="fas fa-warehouse me-2"></i>TheOnlineYard
+                <i class="fas fa-warehouse me-2"></i>{{ \App\Models\PlatformSetting::get('company_name', 'TheOnlineYard') }}
             </a>
             <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
                 <i class="fas fa-bars text-amber"></i>

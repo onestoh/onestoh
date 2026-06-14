@@ -4,22 +4,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Admin — @yield('title', 'Dashboard') | TheOnlineYard</title>
-    
+    <title>Admin — @yield('title', 'Dashboard') | {{ \App\Models\PlatformSetting::get('company_name', 'TheOnlineYard') }}</title>
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
-    
+
+    @php
+    $primaryColor   = \App\Models\PlatformSetting::get('primary_color', '#E8922A');
+    $secondaryColor = \App\Models\PlatformSetting::get('secondary_color', '#2ECC8A');
+    $gradientStart  = \App\Models\PlatformSetting::get('gradient_start', '#E8922A');
+    $gradientEnd    = \App\Models\PlatformSetting::get('gradient_end', '#E84040');
+    @endphp
     <style>
         :root {
             --black: #080C12;
             --dark: #0B1018;
             --surface: #141D2B;
-            --amber: #E8922A;
+            --amber: {{ $primaryColor }};
             --text: #DCE5F2;
             --muted: #7088A8;
-            --green: #2ECC8A;
+            --green: {{ $secondaryColor }};
             --danger: #E84040;
             --border: #1E2D42;
+            --gradient: linear-gradient(135deg, {{ $gradientStart }}, {{ $gradientEnd }});
             --sidebar-width: 240px;
         }
         body { background: var(--dark); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; }
@@ -60,7 +67,7 @@
     <!-- Admin Sidebar -->
     <aside class="admin-sidebar">
         <div class="brand">
-            <a href="#"><i class="fas fa-warehouse me-2"></i>TheOnlineYard</a>
+            <a href="#"><i class="fas fa-warehouse me-2"></i>{{ \App\Models\PlatformSetting::get('company_name', 'TheOnlineYard') }}</a>
             <small><i class="fas fa-shield-alt me-1"></i>Admin Panel</small>
         </div>
         

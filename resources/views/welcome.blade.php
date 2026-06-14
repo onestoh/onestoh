@@ -6,16 +6,23 @@
     <title>TheOnlineYard — Kenya's Premier Vehicle & Machinery Rental Platform</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    @php
+    $primaryColor   = \App\Models\PlatformSetting::get('primary_color', '#E8922A');
+    $secondaryColor = \App\Models\PlatformSetting::get('secondary_color', '#2ECC8A');
+    $gradientStart  = \App\Models\PlatformSetting::get('gradient_start', '#E8922A');
+    $gradientEnd    = \App\Models\PlatformSetting::get('gradient_end', '#E84040');
+    @endphp
     <style>
         :root {
             --black: #080C12;
             --surface: #141D2B;
-            --amber: #E8922A;
+            --amber: {{ $primaryColor }};
             --text: #DCE5F2;
             --muted: #7088A8;
-            --green: #2ECC8A;
+            --green: {{ $secondaryColor }};
             --border: #1E2D42;
             --danger: #E84040;
+            --gradient: linear-gradient(135deg, {{ $gradientStart }}, {{ $gradientEnd }});
         }
         * { box-sizing: border-box; }
         body {

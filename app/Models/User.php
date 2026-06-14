@@ -16,6 +16,7 @@ class User extends Authenticatable
     protected $fillable = [
         'name','email','password','role','phone','national_id','status',
         'trust_score','verification_tier','referral_code','referred_by','avatar',
+        'mfa_code','mfa_code_expires_at',
     ];
 
     protected $hidden = ['password','remember_token'];
@@ -23,8 +24,9 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            'email_verified_at'    => 'datetime',
+            'mfa_code_expires_at'  => 'datetime',
+            'password'             => 'hashed',
         ];
     }
 

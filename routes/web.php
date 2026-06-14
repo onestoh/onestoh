@@ -28,9 +28,15 @@ use App\Http\Controllers\Admin\AdminYardController;
 use App\Http\Controllers\Admin\AdminPayoutController;
 use App\Http\Controllers\Admin\AdminCommissionController;
 use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\Auth\MfaController;
 
 // AUTH
 Auth::routes();
+
+// MFA — must be accessible without being logged in
+Route::get('/mfa/verify', [MfaController::class, 'showVerify'])->name('mfa.verify');
+Route::post('/mfa/verify', [MfaController::class, 'verify'])->name('mfa.verify.post');
+Route::post('/mfa/send', [MfaController::class, 'sendCode'])->name('mfa.send');
 
 // PUBLIC
 Route::get('/', [HomeController::class, 'index'])->name('home');
