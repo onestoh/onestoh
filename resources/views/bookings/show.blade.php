@@ -108,8 +108,8 @@
             </form>
             @endif
 
-            @if($booking->status === 'completed' && $booking->client_id === auth()->id())
-            <a href="#" class="btn w-100 mb-2" style="border:1px solid var(--border);color:var(--muted)">
+            @if($booking->status === 'completed' && $booking->client_id === auth()->id() && !Review::where('booking_id',$booking->id)->where('reviewer_id',auth()->id())->exists())
+            <a href="#reviewForm" class="btn w-100 mb-2" style="border:1px solid rgba(232,146,42,.3);color:var(--amber)">
                 <i class="fas fa-star me-2"></i>Leave Review
             </a>
             @endif
@@ -138,4 +138,42 @@
         @endif
     </div>
 </div>
+@if($booking->status === 'completed' && $booking->client_id === auth()->id())
+@php $alreadyReviewed = \App\Models\Review::where('booking_id',$booking->id)->where('reviewer_id',auth()->id())->exists(); @endphp
+@if(!$alreadyReviewed)
+<div class="info-block mt-4" id="reviewForm">
+    <h6 style="color:var(--amber);font-size:.75rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:1rem"><i class="fas fa-star me-2"></i>Leave a Review</h6>
+    <form method="POST" action="{{ route('reviews.store', $booking) }}" x-data="{ rating: 0, hover: 0 }">
+        @csrf
+        <div class="mb-3">
+            <label style="color:var(--muted);font-size:.82rem;display:block;margin-bottom:.4rem">Your Rating</label>
+            <div class="d-flex gap-1" style="font-size:1.6rem">
+                @for($i = 1; $i <= 5; $i++)
+                <span style="cursor:pointer;transition:color .15s"
+                    :style="(hover >= {{ $i }} || rating >= {{ $i }}) ? 'color:var(--amber)' : 'color:var(--border)'"
+                    @mouseenter="hover = {{ $i }}" @mouseleave="hover = 0"
+                    @click="rating = {{ $i }}">
+                    <i class="fas fa-star"></i>
+                </span>
+                @endfor
+            </div>
+            <input type="hidden" name="rating" :value="rating" required>
+            <div x-show="rating === 0" style="color:var(--danger);font-size:.75rem;margin-top:.25rem">Please select a rating.</div>
+        </div>
+        <div class="mb-3">
+            <label style="color:var(--muted);font-size:.82rem;display:block;margin-bottom:.4rem">Comment</label>
+            <textarea name="comment" rows="3" class="form-control" style="background:var(--black);border:1px solid var(--border);color:var(--text);resize:none"
+                placeholder="Share your experience with this equipment/service..." required maxlength="1000"></textarea>
+        </div>
+        <button type="submit" class="btn btn-amber btn-sm" :disabled="rating === 0">
+            <i class="fas fa-paper-plane me-1"></i>Submit Review
+        </button>
+    </form>
+</div>
+@else
+<div class="info-block mt-4" style="border-color:rgba(46,204,138,.3)">
+    <p style="color:var(--green);margin:0;font-size:.9rem"><i class="fas fa-check-circle me-2"></i>You have already reviewed this booking.</p>
+</div>
+@endif
+@endif
 @endsection

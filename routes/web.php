@@ -27,6 +27,7 @@ use App\Http\Controllers\Admin\AdminCategoryController;
 use App\Http\Controllers\Admin\AdminYardController;
 use App\Http\Controllers\Admin\AdminPayoutController;
 use App\Http\Controllers\Admin\AdminCommissionController;
+use App\Http\Controllers\ReviewController;
 
 // AUTH
 Auth::routes();
@@ -104,6 +105,13 @@ Route::middleware('auth')->group(function () {
     });
 
     Route::post('/payments/mpesa/callback', [BookingController::class, 'mpesaCallback'])->name('payments.mpesa.callback');
+
+    // Wallet top-up
+    Route::post('/wallet/topup', [WalletController::class, 'topup'])->name('wallet.topup');
+    Route::post('/wallet/topup/callback', [WalletController::class, 'topupCallback'])->name('wallet.topup.callback')->withoutMiddleware(['auth', 'verified']);
+
+    // Reviews
+    Route::post('/bookings/{booking}/reviews', [ReviewController::class, 'store'])->name('reviews.store');
 });
 
 // ADMIN

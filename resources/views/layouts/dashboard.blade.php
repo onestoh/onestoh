@@ -78,6 +78,13 @@
             <a href="{{ route('profile.edit') }}" class="sidebar-link {{ request()->routeIs('profile.*') ? 'active' : '' }}"><i class="fas fa-user"></i>My Profile</a>
             <a href="{{ route('wallet.index') }}" class="sidebar-link {{ request()->routeIs('wallet.*') ? 'active' : '' }}"><i class="fas fa-wallet"></i>Wallet</a>
             <a href="{{ route('notifications.index') }}" class="sidebar-link {{ request()->routeIs('notifications.*') ? 'active' : '' }}"><i class="fas fa-bell"></i>Notifications</a>
+            <a href="{{ route('messages.index') }}" class="sidebar-link {{ request()->routeIs('messages.*') ? 'active' : '' }}">
+                <i class="fas fa-comments"></i>Messages
+                @php $unreadMsgs = auth()->user()->receivedMessages()->where('is_read', false)->count(); @endphp
+                @if($unreadMsgs > 0)
+                <span class="ms-auto badge" style="background:var(--amber);color:#000;font-size:.65rem;border-radius:20px;padding:2px 7px">{{ $unreadMsgs }}</span>
+                @endif
+            </a>
 
             @if(auth()->user() && in_array(auth()->user()->role, ['yard_owner','individual_owner','super_admin']))
             <div class="sidebar-section">My Listings</div>
